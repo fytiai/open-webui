@@ -95,8 +95,8 @@ class SafeWebBaseLoader(WebBaseLoader):
 
 def get_web_loader(
         urls: Union[str, Sequence[str]],
+        verify_ssl: bool = False,
         requests_per_second: int = 2,
-        verify_ssl=False
 ):
     return OptimizedWebLoader(
         urls=urls,
