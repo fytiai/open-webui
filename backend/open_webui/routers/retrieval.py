@@ -1269,7 +1269,7 @@ async def process_web_search(
             request, request.app.state.config.RAG_WEB_SEARCH_ENGINE, form_data.query
         )
     except Exception as e:
-        log.exception(e)
+        log.error(f"Error search_web: {e}")
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -1303,6 +1303,7 @@ async def process_web_search(
         }
     except Exception as e:
         log.exception(e)
+        log.error()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ERROR_MESSAGES.DEFAULT(e),
