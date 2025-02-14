@@ -7,7 +7,7 @@ from pydantic import BaseModel
 import mimetypes
 from urllib.parse import quote
 
-from open_webui.storage.provider import Storage
+from open_webui.storage.provider import Storage, LocalStorageProvider
 
 from open_webui.models.files import (
     FileForm,
@@ -24,6 +24,7 @@ from open_webui.constants import ERROR_MESSAGES
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Request
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.concurrency import run_in_threadpool
 
 
 from open_webui.utils.auth import get_admin_user, get_verified_user
@@ -40,7 +41,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=FileModelResponse)
-def upload_file(
+async def upload_file(
     request: Request, file: UploadFile = File(...), user=Depends(get_verified_user)
 ):
     log.info(f"file.content_type: {file.content_type}")
@@ -52,7 +53,9 @@ def upload_file(
         id = str(uuid.uuid4())
         name = filename
         filename = f"{id}_{filename}"
-        contents, file_path = Storage.upload_file(file.file, filename)
+
+        # contents, file_path = Storage.upload_file(file.file, filename)
+        contents, file_path = await run_in_threadpool(lambda: LocalStorageProvider.upload_file(file.file, filename))
 
         file_item = Files.insert_new_file(
             user.id,
@@ -71,7 +74,9 @@ def upload_file(
         )
 
         try:
-            process_file(request, ProcessFileForm(file_id=id), user=user)
+            await run_in_threadpool(lambda: process_file(request, ProcessFileForm(file_id=id), user=user))
+
+            # process_file(request, ProcessFileForm(file_id=id), user=user)
             file_item = Files.get_file_by_id(id=id)
         except Exception as e:
             log.exception(e)
