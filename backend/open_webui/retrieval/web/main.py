@@ -27,10 +27,6 @@ def get_filtered_results(results, filter_list=None):
         if filter_list:
             if not any(domain.endswith(filtered_domain) for filtered_domain in filter_list):
                 continue
-
-        # # 校验文件后缀
-        # lower_url = url.lower()
-        # if any(lower_url.endswith(ext) for ext in allowed_extensions) or '.' not in lower_url.split('/')[-1]:
         filtered_results.append(result)
 
     return filtered_results
