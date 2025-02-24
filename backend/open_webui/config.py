@@ -2169,3 +2169,10 @@ LDAP_CA_CERT_FILE = PersistentConfig(
 LDAP_CIPHERS = PersistentConfig(
     "LDAP_CIPHERS", "ldap.server.ciphers", os.environ.get("LDAP_CIPHERS", "ALL")
 )
+
+
+####################################
+# dify
+####################################
+
+FOSUN_AGENT_MODEL = os.environ.get("DIFY_AGENT_MODEL", "fosun-agent")
