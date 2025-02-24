@@ -469,7 +469,7 @@
 												<span class="relative inline-flex rounded-full size-2 bg-green-500" />
 											</span>
 										</div>
-										<div class=" translate-y-[0.5px]">{$i18n.t('Execute code for analysis')}</div>
+										<div class=" translate-y-[0.5px]">{$i18n.t('Execute Fosun Agent')}</div>
 									</div>
 								</div>
 							{/if}
@@ -1170,7 +1170,7 @@
 												{/if}
 
 												{#if $_user.role === 'admin' || $_user?.permissions?.features?.code_interpreter}
-													<Tooltip content={$i18n.t('Execute code for analysis')} placement="top">
+													<Tooltip content={$i18n.t('Execute Fosun Agent')} placement="top">
 														<button
 															on:click|preventDefault={() =>
 																(codeInterpreterEnabled = !codeInterpreterEnabled)}
@@ -1182,7 +1182,7 @@
 															<CommandLine className="size-5" strokeWidth="1.75" />
 															<span
 																class="hidden @sm:block whitespace-nowrap overflow-hidden text-ellipsis translate-y-[0.5px] mr-0.5"
-																>{$i18n.t('Code Interpreter')}</span
+																>{$i18n.t('Fosun Agent')}</span
 															>
 														</button>
 													</Tooltip>

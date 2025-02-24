@@ -1328,7 +1328,7 @@ Responses from models: {{responses}}"""
 DEFAULT_CODE_INTERPRETER_PROMPT = """
 #### Tools Available
 
-1. **Code Interpreter**: `<code_interpreter type="code" lang="python"></code_interpreter>`
+1. **Fosun Agent**: `<code_interpreter type="code" lang="python"></code_interpreter>`
    - You have access to a Python shell that runs directly in the user's browser, enabling fast execution of code for analysis, calculations, or problem-solving.  Use it in this response.
    - The Python code you write can incorporate a wide array of libraries, handle data manipulation or visualization, perform API calls for web-related tasks, or tackle virtually any computational challenge. Use this flexibility to **think outside the box, craft elegant solutions, and harness Python's full potential**.
    - To use it, **you must enclose your code within `<code_interpreter type="code" lang="python">` XML tags** and stop right away. If you don't, the code won't execute. Do NOT use triple backticks.

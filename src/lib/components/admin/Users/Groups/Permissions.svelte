@@ -261,7 +261,7 @@
 
 		<div class="  flex w-full justify-between my-2 pr-2">
 			<div class=" self-center text-xs font-medium">
-				{$i18n.t('Code Interpreter')}
+				{$i18n.t('Fosun Agent')}
 			</div>
 
 			<Switch bind:state={permissions.features.code_interpreter} />
