@@ -464,9 +464,9 @@
 										<div class="pl-1">
 											<span class="relative flex size-2">
 												<span
-													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+													class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
 												/>
-												<span class="relative inline-flex rounded-full size-2 bg-green-500" />
+												<span class="relative inline-flex rounded-full size-2 bg-yellow-500" />
 											</span>
 										</div>
 										<div class=" translate-y-[0.5px]">{$i18n.t('Execute Fosun Agent')}</div>
@@ -1176,7 +1176,7 @@
 																(codeInterpreterEnabled = !codeInterpreterEnabled)}
 															type="button"
 															class="px-1.5 @sm:px-2.5 py-1.5 flex gap-1.5 items-center text-sm rounded-full font-medium transition-colors duration-300 focus:outline-none max-w-full overflow-hidden {codeInterpreterEnabled
-																? 'bg-gray-100 dark:bg-gray-500/20 text-gray-600 dark:text-gray-400'
+																? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400'
 																: 'bg-transparent text-gray-600 dark:text-gray-300 border-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 '}"
 														>
 															<CommandLine className="size-5" strokeWidth="1.75" />
