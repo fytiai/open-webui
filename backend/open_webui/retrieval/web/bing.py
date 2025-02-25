@@ -45,32 +45,55 @@ def search_bing(
         log.error(f"Error: {ex}")
         raise ex
 
-#
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser(description="Search Bing from the command line.")
-#     parser.add_argument(
-#         "query",
-#         type=str,
-#         default="Top 5 international news today",
-#         help="The search query.",
-#     )
-#     parser.add_argument(
-#         "--count", type=int, default=5, help="Number of search results to return."
-#     )
-#     parser.add_argument(
-#         "--filter", nargs="*", help="List of filters to apply to the search results."
-#     )
-#     parser.add_argument(
-#         "--locale",
-#         type=str,
-#         default="en-US",
-#         help="The locale to use for the search, maps to market in api",
-#     )
-#
-#     # args = parser.parse_args()
-#
-#     # results = search_bing(args.locale, args.query, args.count, args.filter)
-#
-#     results = search_bing("","https://api.bing.microsoft.com/v7.0/search","zh-CN", "", 5, None)
-#
-#     pprint(results)
+
+import requests
+
+
+def main(url: str, name: str) -> dict:
+    # 发送GET请求以流方式下载文件
+    with requests.get(url, stream=True) as download_response:
+        download_response.raise_for_status()
+
+        # 强制指定文件类型为PDF
+        content_type = "application/pdf"
+        # 构造包含强制类型的三元组文件流
+        file_tuple = (f"{name}", download_response.raw, content_type)
+        # 创建一个流请求，将下载的文件直接上传到另一个接口
+        files = {'file': file_tuple}
+
+        upload_response = requests.post("https://omniparse-ai.fosun.com/plus/document/parse", files=files)
+
+    return upload_response.text
+
+
+if __name__ == "__main__":
+    main("https://fosun-lcp-clickpaas.oss-cn-shanghai.aliyuncs.com/fosun-dify-files-images/1221489743.pdf",
+         "1221489743.pdf")
+
+    # parser = argparse.ArgumentParser(description="Search Bing from the command line.")
+    # parser.add_argument(
+    #     "query",
+    #     type=str,
+    #     default="Top 5 international news today",
+    #     help="The search query.",
+    # )
+    # parser.add_argument(
+    #     "--count", type=int, default=5, help="Number of search results to return."
+    # )
+    # parser.add_argument(
+    #     "--filter", nargs="*", help="List of filters to apply to the search results."
+    # )
+    # parser.add_argument(
+    #     "--locale",
+    #     type=str,
+    #     default="en-US",
+    #     help="The locale to use for the search, maps to market in api",
+    # )
+    #
+    # # args = parser.parse_args()
+    #
+    # # results = search_bing(args.locale, args.query, args.count, args.filter)
+    #
+    # results = search_bing("","https://api.bing.microsoft.com/v7.0/search","zh-CN", "", 5, None)
+    #
+    # pprint(results)
