@@ -1,11 +1,10 @@
 import logging
-import os
-from pprint import pprint
 from typing import Optional
+
 import requests
-from open_webui.retrieval.web.main import SearchResult, get_filtered_results
+
 from open_webui.env import SRC_LOG_LEVELS
-import argparse
+from open_webui.retrieval.web.main import SearchResult, get_filtered_results
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
@@ -46,29 +45,11 @@ def search_bing(
         raise ex
 
 
-import requests
 
 
-def main(url: str, name: str) -> dict:
-    # 发送GET请求以流方式下载文件
-    with requests.get(url, stream=True) as download_response:
-        download_response.raise_for_status()
-
-        # 强制指定文件类型为PDF
-        content_type = "application/pdf"
-        # 构造包含强制类型的三元组文件流
-        file_tuple = (f"{name}", download_response.raw, content_type)
-        # 创建一个流请求，将下载的文件直接上传到另一个接口
-        files = {'file': file_tuple}
-
-        upload_response = requests.post("https://omniparse-ai.fosun.com/plus/document/parse", files=files)
-
-    return upload_response.text
-
-
-if __name__ == "__main__":
-    main("https://fosun-lcp-clickpaas.oss-cn-shanghai.aliyuncs.com/fosun-dify-files-images/1221489743.pdf",
-         "1221489743.pdf")
+# if __name__ == "__main__":
+    # main("https://fosun-lcp-clickpaas.oss-cn-shanghai.aliyuncs.com/fosun-dify-files-images/1221489743.pdf",
+    #      "1221489743.pdf")
 
     # parser = argparse.ArgumentParser(description="Search Bing from the command line.")
     # parser.add_argument(
