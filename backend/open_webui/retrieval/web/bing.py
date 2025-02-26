@@ -1,11 +1,10 @@
 import logging
-import os
-from pprint import pprint
 from typing import Optional
+
 import requests
-from open_webui.retrieval.web.main import SearchResult, get_filtered_results
+
 from open_webui.env import SRC_LOG_LEVELS
-import argparse
+from open_webui.retrieval.web.main import SearchResult, get_filtered_results
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
@@ -46,7 +45,11 @@ def search_bing(
         raise ex
 
 
+
+
 # if __name__ == "__main__":
+    # main("https://fosun-lcp-clickpaas.oss-cn-shanghai.aliyuncs.com/fosun-dify-files-images/1221489743.pdf",
+    #      "1221489743.pdf")
 
     # parser = argparse.ArgumentParser(description="Search Bing from the command line.")
     # parser.add_argument(
