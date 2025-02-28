@@ -1824,10 +1824,10 @@ async def process_chat_response(
                                     )
                                 else:
                                     output = {
-                                        "stdout": "Code interpreter engine not configured."
+                                        "stdout": "Fosun Knowledge engine not configured."
                                     }
 
-                                log.debug(f"Code interpreter output: {output}")
+                                log.debug(f"Fosun Knowledge output: {output}")
 
                                 if isinstance(output, dict):
                                     stdout = output.get("stdout", "")

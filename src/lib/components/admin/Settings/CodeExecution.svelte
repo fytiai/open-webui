@@ -154,14 +154,14 @@
 				</div>
 
 				<div class="mb-3.5">
-					<div class=" mb-2.5 text-base font-medium">{$i18n.t('Code Interpreter')}</div>
+					<div class=" mb-2.5 text-base font-medium">{$i18n.t('Fosun Knowledge')}</div>
 
 					<hr class=" border-gray-100 dark:border-gray-850 my-2" />
 
 					<div class="mb-2.5">
 						<div class=" flex w-full justify-between">
 							<div class=" self-center text-xs font-medium">
-								{$i18n.t('Enable Code Interpreter')}
+								{$i18n.t('Enable Fosun Knowledge')}
 							</div>
 
 							<Switch bind:state={config.ENABLE_CODE_INTERPRETER} />
@@ -172,7 +172,7 @@
 						<div class="mb-2.5">
 							<div class="  flex w-full justify-between">
 								<div class=" self-center text-xs font-medium">
-									{$i18n.t('Code Interpreter Engine')}
+									{$i18n.t('Fosun Knowledge Engine')}
 								</div>
 								<div class="flex items-center relative">
 									<select
@@ -283,7 +283,7 @@
 						<div>
 							<div class="py-0.5 w-full">
 								<div class=" mb-2.5 text-xs font-medium">
-									{$i18n.t('Code Interpreter Prompt Template')}
+									{$i18n.t('Fosun Knowledge Prompt Template')}
 								</div>
 
 								<Tooltip

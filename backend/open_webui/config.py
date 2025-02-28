@@ -752,7 +752,7 @@ if OLLAMA_BASE_URL == "" and OLLAMA_API_BASE_URL != "":
 if ENV == "prod":
     if OLLAMA_BASE_URL == "/ollama" and not K8S_FLAG:
         if USE_OLLAMA_DOCKER.lower() == "true":
-            # if you use all-in-one docker container (Open WebUI + Ollama)
+            # if you use all-in-one docker container (Fosun DeepSeek  + Ollama)
             # with the docker build arg USE_OLLAMA=true (--build-arg="USE_OLLAMA=true") this only works with http://localhost:11434
             OLLAMA_BASE_URL = "http://localhost:11434"
         else:
@@ -1370,7 +1370,7 @@ Responses from models: {{responses}}"""
 
 
 ####################################
-# Code Interpreter
+# Fosun Knowledge
 ####################################
 
 
@@ -2440,4 +2440,4 @@ LDAP_CIPHERS = PersistentConfig(
 # dify
 ####################################
 
-FOSUN_AGENT_MODEL = os.environ.get("DIFY_AGENT_MODEL", "fosun-agent")
+FOSUN_AGENT_MODEL = os.environ.get("DIFY_AGENT_MODEL", "Ai-Agent")
