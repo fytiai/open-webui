@@ -12,7 +12,7 @@ assignees: ''
 
 - **Before submitting a bug report**: Please check the Issues or Discussions section to see if a similar issue or feature request has already been posted. It's likely we're already tracking it! If you’re unsure, start a discussion post first. This will help us efficiently focus on improving the project.
 
-- **Collaborate respectfully**: We value a constructive attitude, so please be mindful of your communication. If negativity is part of your approach, our capacity to engage may be limited. We’re here to help if you’re open to learning and communicating positively. Remember, Fosun DeepSeek  is a volunteer-driven project managed by a single maintainer and supported by contributors who also have full-time jobs. We appreciate your time and ask that you respect ours.
+- **Collaborate respectfully**: We value a constructive attitude, so please be mindful of your communication. If negativity is part of your approach, our capacity to engage may be limited. We’re here to help if you’re open to learning and communicating positively. Remember, Fosun DeepSeek is a volunteer-driven project managed by a single maintainer and supported by contributors who also have full-time jobs. We appreciate your time and ask that you respect ours.
 
 - **Contributing**: If you encounter an issue, we highly encourage you to submit a pull request or fork the project. We actively work to prevent contributor burnout to maintain the quality and continuity of Fosun DeepSeek .
 
@@ -28,7 +28,7 @@ Note: Please remove the notes above when submitting your post. Thank you for you
 
 ## Environment
 
-- **Fosun DeepSeek  Version:** [e.g., v0.3.11]
+- **Fosun DeepSeek Version:** [e.g., v0.3.11]
 - **Ollama (if applicable):** [e.g., v0.2.0, v0.1.32-rc1]
 
 - **Operating System:** [e.g., Windows 10, macOS Big Sur, Ubuntu 20.04]
@@ -37,7 +37,7 @@ Note: Please remove the notes above when submitting your post. Thank you for you
 **Confirmation:**
 
 - [ ] I have read and followed all the instructions provided in the README.md.
-- [ ] I am on the latest version of both Fosun DeepSeek  and Ollama.
+- [ ] I am on the latest version of both Fosun DeepSeek and Ollama.
 - [ ] I have included the browser console logs.
 - [ ] I have included the Docker container logs.
 - [ ] I have provided the exact steps to reproduce the bug in the "Steps to Reproduce" section below.

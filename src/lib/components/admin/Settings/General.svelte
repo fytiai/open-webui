@@ -175,7 +175,9 @@
 									{$i18n.t('Help')}
 								</div>
 								<div class=" text-xs text-gray-500">
-									{$i18n.t('Discover how to use Fosun DeepSeek  and seek support from the community.')}
+									{$i18n.t(
+										'Discover how to use Fosun DeepSeek  and seek support from the community.'
+									)}
 								</div>
 							</div>
 

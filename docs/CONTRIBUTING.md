@@ -1,12 +1,12 @@
-# Contributing to Fosun DeepSeek 
+# Contributing to Fosun DeepSeek
 
 🚀 **Welcome, Contributors!** 🚀
 
-Your interest in contributing to Fosun DeepSeek  is greatly appreciated. This document is here to guide you through the process, ensuring your contributions enhance the project effectively. Let's make Fosun DeepSeek  even better, together!
+Your interest in contributing to Fosun DeepSeek is greatly appreciated. This document is here to guide you through the process, ensuring your contributions enhance the project effectively. Let's make Fosun DeepSeek even better, together!
 
 ## 📌 Key Points
 
-### 🦙 Ollama vs. Fosun DeepSeek 
+### 🦙 Ollama vs. Fosun DeepSeek
 
 It's crucial to distinguish between Ollama and Fosun DeepSeek :
 
@@ -26,11 +26,11 @@ Noticed something off? Have an idea? Check our [Issues tab](https://github.com/o
 
 ### 🧭 Scope of Support
 
-We've noticed an uptick in issues not directly related to Fosun DeepSeek  but rather to the environment it's run in, especially Docker setups. While we strive to support Docker deployment, understanding Docker fundamentals is crucial for a smooth experience.
+We've noticed an uptick in issues not directly related to Fosun DeepSeek but rather to the environment it's run in, especially Docker setups. While we strive to support Docker deployment, understanding Docker fundamentals is crucial for a smooth experience.
 
-- **Docker Deployment Support**: Fosun DeepSeek  supports Docker deployment. Familiarity with Docker is assumed. For Docker basics, please refer to the [official Docker documentation](https://docs.docker.com/get-started/overview/).
+- **Docker Deployment Support**: Fosun DeepSeek supports Docker deployment. Familiarity with Docker is assumed. For Docker basics, please refer to the [official Docker documentation](https://docs.docker.com/get-started/overview/).
 
-- **Advanced Configurations**: Setting up reverse proxies for HTTPS and managing Docker deployments requires foundational knowledge. There are numerous online resources available to learn these skills. Ensuring you have this knowledge will greatly enhance your experience with Fosun DeepSeek  and similar projects.
+- **Advanced Configurations**: Setting up reverse proxies for HTTPS and managing Docker deployments requires foundational knowledge. There are numerous online resources available to learn these skills. Ensuring you have this knowledge will greatly enhance your experience with Fosun DeepSeek and similar projects.
 
 ## 💡 Contributing
 
@@ -48,11 +48,11 @@ We welcome pull requests. Before submitting one, please:
 
 ### 📚 Documentation & Tutorials
 
-Help us make Fosun DeepSeek  more accessible by improving documentation, writing tutorials, or creating guides on setting up and optimizing the web UI.
+Help us make Fosun DeepSeek more accessible by improving documentation, writing tutorials, or creating guides on setting up and optimizing the web UI.
 
 ### 🌐 Translations and Internationalization
 
-Help us make Fosun DeepSeek  available to a wider audience. In this section, we'll guide you through the process of adding new translations to the project.
+Help us make Fosun DeepSeek available to a wider audience. In this section, we'll guide you through the process of adding new translations to the project.
 
 We use JSON files to store translations. You can find the existing translation files in the `src/lib/i18n/locales` directory. Each directory corresponds to a specific language, for example, `en-US` for English (US), `fr-FR` for French (France) and so on. You can refer to [ISO 639 Language Codes](http://www.lingoes.net/en/translator/langcode.htm) to find the appropriate code for a specific language.
 
