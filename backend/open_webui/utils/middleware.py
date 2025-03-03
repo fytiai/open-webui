@@ -730,14 +730,7 @@ async def process_chat_payload(request, form_data, metadata, user, model):
             )
 
         if "code_interpreter" in features and features["code_interpreter"]:
-            form_data["messages"] = add_or_update_user_message(
-                (
-                    request.app.state.config.CODE_INTERPRETER_PROMPT_TEMPLATE
-                    if request.app.state.config.CODE_INTERPRETER_PROMPT_TEMPLATE != ""
-                    else DEFAULT_CODE_INTERPRETER_PROMPT
-                ),
-                form_data["messages"],
-            )
+            form_data["model"] = FOSUN_AGENT_MODEL
 
     tool_ids = form_data.pop("tool_ids", None)
     files = form_data.pop("files", None)
