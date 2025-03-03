@@ -35,6 +35,7 @@ class EndpointFilter(logging.Filter):
 # Filter out /endpoint
 logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
 
+
 ####################################
 # Config helpers
 ####################################
@@ -284,7 +285,6 @@ API_KEY_ALLOWED_ENDPOINTS = PersistentConfig(
     os.environ.get("API_KEY_ALLOWED_ENDPOINTS", ""),
 )
 
-
 JWT_EXPIRES_IN = PersistentConfig(
     "JWT_EXPIRES_IN", "auth.jwt_expiry", os.environ.get("JWT_EXPIRES_IN", "-1")
 )
@@ -318,7 +318,6 @@ GOOGLE_CLIENT_SECRET = PersistentConfig(
     "oauth.google.client_secret",
     os.environ.get("GOOGLE_CLIENT_SECRET", ""),
 )
-
 
 GOOGLE_OAUTH_SCOPE = PersistentConfig(
     "GOOGLE_OAUTH_SCOPE",
@@ -492,7 +491,6 @@ OAUTH_ALLOWED_DOMAINS = PersistentConfig(
 def load_oauth_providers():
     OAUTH_PROVIDERS.clear()
     if GOOGLE_CLIENT_ID.value and GOOGLE_CLIENT_SECRET.value:
-
         def google_oauth_register(client):
             client.register(
                 name="google",
@@ -509,11 +507,10 @@ def load_oauth_providers():
         }
 
     if (
-        MICROSOFT_CLIENT_ID.value
-        and MICROSOFT_CLIENT_SECRET.value
-        and MICROSOFT_CLIENT_TENANT_ID.value
+            MICROSOFT_CLIENT_ID.value
+            and MICROSOFT_CLIENT_SECRET.value
+            and MICROSOFT_CLIENT_TENANT_ID.value
     ):
-
         def microsoft_oauth_register(client):
             client.register(
                 name="microsoft",
@@ -533,7 +530,6 @@ def load_oauth_providers():
         }
 
     if GITHUB_CLIENT_ID.value and GITHUB_CLIENT_SECRET.value:
-
         def github_oauth_register(client):
             client.register(
                 name="github",
@@ -554,11 +550,10 @@ def load_oauth_providers():
         }
 
     if (
-        OAUTH_CLIENT_ID.value
-        and OAUTH_CLIENT_SECRET.value
-        and OPENID_PROVIDER_URL.value
+            OAUTH_CLIENT_ID.value
+            and OAUTH_CLIENT_SECRET.value
+            and OPENID_PROVIDER_URL.value
     ):
-
         def oidc_oauth_register(client):
             client.register(
                 name="oidc",
@@ -606,7 +601,6 @@ if frontend_splash.exists():
 else:
     logging.warning(f"Frontend splash not found at {frontend_splash}")
 
-
 ####################################
 # CUSTOM_NAME
 ####################################
@@ -649,7 +643,6 @@ if CUSTOM_NAME:
         log.exception(e)
         pass
 
-
 ####################################
 # STORAGE PROVIDER
 ####################################
@@ -673,7 +666,6 @@ GOOGLE_APPLICATION_CREDENTIALS_JSON = os.environ.get(
 
 UPLOAD_DIR = f"{DATA_DIR}/uploads"
 Path(UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
-
 
 ####################################
 # Cache DIR
@@ -703,7 +695,6 @@ if OLLAMA_BASE_URL:
         OLLAMA_BASE_URL[:-1] if OLLAMA_BASE_URL.endswith("/") else OLLAMA_BASE_URL
     )
 
-
 K8S_FLAG = os.environ.get("K8S_FLAG", "")
 USE_OLLAMA_DOCKER = os.environ.get("USE_OLLAMA_DOCKER", "false")
 
@@ -724,7 +715,6 @@ if ENV == "prod":
             OLLAMA_BASE_URL = "http://host.docker.internal:11434"
     elif K8S_FLAG:
         OLLAMA_BASE_URL = "http://ollama-service.open-webui.svc.cluster.local:11434"
-
 
 OLLAMA_BASE_URLS = os.environ.get("OLLAMA_BASE_URLS", "")
 OLLAMA_BASE_URLS = OLLAMA_BASE_URLS if OLLAMA_BASE_URLS != "" else OLLAMA_BASE_URL
@@ -751,10 +741,8 @@ ENABLE_OPENAI_API = PersistentConfig(
     os.environ.get("ENABLE_OPENAI_API", "True").lower() == "true",
 )
 
-
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_API_BASE_URL = os.environ.get("OPENAI_API_BASE_URL", "")
-
 
 if OPENAI_API_BASE_URL == "":
     OPENAI_API_BASE_URL = "https://api.openai.com/v1"
@@ -805,7 +793,6 @@ WEBUI_URL = PersistentConfig(
     "WEBUI_URL", "webui.url", os.environ.get("WEBUI_URL", "http://localhost:3000")
 )
 
-
 ENABLE_SIGNUP = PersistentConfig(
     "ENABLE_SIGNUP",
     "ui.enable_signup",
@@ -821,7 +808,6 @@ ENABLE_LOGIN_FORM = PersistentConfig(
     "ui.ENABLE_LOGIN_FORM",
     os.environ.get("ENABLE_LOGIN_FORM", "True").lower() == "true",
 )
-
 
 DEFAULT_LOCALE = PersistentConfig(
     "DEFAULT_LOCALE",
@@ -880,58 +866,57 @@ DEFAULT_USER_ROLE = PersistentConfig(
 )
 
 USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS = (
-    os.environ.get("USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS", "False").lower()
-    == "true"
+        os.environ.get("USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS", "False").lower()
+        == "true"
 )
 
 USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ACCESS = (
-    os.environ.get("USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ACCESS", "False").lower()
-    == "true"
+        os.environ.get("USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ACCESS", "False").lower()
+        == "true"
 )
 
 USER_PERMISSIONS_WORKSPACE_PROMPTS_ACCESS = (
-    os.environ.get("USER_PERMISSIONS_WORKSPACE_PROMPTS_ACCESS", "False").lower()
-    == "true"
+        os.environ.get("USER_PERMISSIONS_WORKSPACE_PROMPTS_ACCESS", "False").lower()
+        == "true"
 )
 
 USER_PERMISSIONS_WORKSPACE_TOOLS_ACCESS = (
-    os.environ.get("USER_PERMISSIONS_WORKSPACE_TOOLS_ACCESS", "False").lower() == "true"
+        os.environ.get("USER_PERMISSIONS_WORKSPACE_TOOLS_ACCESS", "False").lower() == "true"
 )
 
 USER_PERMISSIONS_CHAT_CONTROLS = (
-    os.environ.get("USER_PERMISSIONS_CHAT_CONTROLS", "True").lower() == "true"
+        os.environ.get("USER_PERMISSIONS_CHAT_CONTROLS", "True").lower() == "true"
 )
 
 USER_PERMISSIONS_CHAT_FILE_UPLOAD = (
-    os.environ.get("USER_PERMISSIONS_CHAT_FILE_UPLOAD", "True").lower() == "true"
+        os.environ.get("USER_PERMISSIONS_CHAT_FILE_UPLOAD", "True").lower() == "true"
 )
 
 USER_PERMISSIONS_CHAT_DELETE = (
-    os.environ.get("USER_PERMISSIONS_CHAT_DELETE", "True").lower() == "true"
+        os.environ.get("USER_PERMISSIONS_CHAT_DELETE", "True").lower() == "true"
 )
 
 USER_PERMISSIONS_CHAT_EDIT = (
-    os.environ.get("USER_PERMISSIONS_CHAT_EDIT", "True").lower() == "true"
+        os.environ.get("USER_PERMISSIONS_CHAT_EDIT", "True").lower() == "true"
 )
 
 USER_PERMISSIONS_CHAT_TEMPORARY = (
-    os.environ.get("USER_PERMISSIONS_CHAT_TEMPORARY", "True").lower() == "true"
+        os.environ.get("USER_PERMISSIONS_CHAT_TEMPORARY", "True").lower() == "true"
 )
 
 USER_PERMISSIONS_FEATURES_WEB_SEARCH = (
-    os.environ.get("USER_PERMISSIONS_FEATURES_WEB_SEARCH", "True").lower() == "true"
+        os.environ.get("USER_PERMISSIONS_FEATURES_WEB_SEARCH", "True").lower() == "true"
 )
 
 USER_PERMISSIONS_FEATURES_IMAGE_GENERATION = (
-    os.environ.get("USER_PERMISSIONS_FEATURES_IMAGE_GENERATION", "True").lower()
-    == "true"
+        os.environ.get("USER_PERMISSIONS_FEATURES_IMAGE_GENERATION", "True").lower()
+        == "true"
 )
 
 USER_PERMISSIONS_FEATURES_CODE_INTERPRETER = (
-    os.environ.get("USER_PERMISSIONS_FEATURES_CODE_INTERPRETER", "True").lower()
-    == "true"
+        os.environ.get("USER_PERMISSIONS_FEATURES_CODE_INTERPRETER", "True").lower()
+        == "true"
 )
-
 
 DEFAULT_USER_PERMISSIONS = {
     "workspace": {
@@ -966,7 +951,6 @@ ENABLE_CHANNELS = PersistentConfig(
     os.environ.get("ENABLE_CHANNELS", "False").lower() == "true",
 )
 
-
 ENABLE_EVALUATION_ARENA_MODELS = PersistentConfig(
     "ENABLE_EVALUATION_ARENA_MODELS",
     "evaluation.arena.enable",
@@ -995,7 +979,7 @@ WEBHOOK_URL = PersistentConfig(
 ENABLE_ADMIN_EXPORT = os.environ.get("ENABLE_ADMIN_EXPORT", "True").lower() == "true"
 
 ENABLE_ADMIN_CHAT_ACCESS = (
-    os.environ.get("ENABLE_ADMIN_CHAT_ACCESS", "True").lower() == "true"
+        os.environ.get("ENABLE_ADMIN_CHAT_ACCESS", "True").lower() == "true"
 )
 
 ENABLE_COMMUNITY_SHARING = PersistentConfig(
@@ -1064,7 +1048,6 @@ except Exception as e:
 
 WEBUI_BANNERS = PersistentConfig("WEBUI_BANNERS", "ui.banners", banners)
 
-
 SHOW_ADMIN_DETAILS = PersistentConfig(
     "SHOW_ADMIN_DETAILS",
     "auth.admin.show",
@@ -1076,7 +1059,6 @@ ADMIN_EMAIL = PersistentConfig(
     "auth.admin.email",
     os.environ.get("ADMIN_EMAIL", None),
 )
-
 
 ####################################
 # TASKS
@@ -1178,7 +1160,6 @@ ENABLE_TAGS_GENERATION = PersistentConfig(
     os.environ.get("ENABLE_TAGS_GENERATION", "True").lower() == "true",
 )
 
-
 ENABLE_SEARCH_QUERY_GENERATION = PersistentConfig(
     "ENABLE_SEARCH_QUERY_GENERATION",
     "task.query.search.enable",
@@ -1190,7 +1171,6 @@ ENABLE_RETRIEVAL_QUERY_GENERATION = PersistentConfig(
     "task.query.retrieval.enable",
     os.environ.get("ENABLE_RETRIEVAL_QUERY_GENERATION", "True").lower() == "true",
 )
-
 
 QUERY_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
     "QUERY_GENERATION_PROMPT_TEMPLATE",
@@ -1240,7 +1220,6 @@ AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
     os.environ.get("AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE", ""),
 )
 
-
 DEFAULT_AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE = """### Task:
 You are an autocompletion system. Continue the text in `<text>` based on the **completion type** in `<type>` and the given language.  
 
@@ -1289,7 +1268,6 @@ TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = PersistentConfig(
     os.environ.get("TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE", ""),
 )
 
-
 DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE = """Available Tools: {{TOOLS}}
 
 Your task is to choose and return the correct tool(s) from the list of available tools based on the query. Follow these guidelines:
@@ -1313,7 +1291,6 @@ The format for the JSON response is strictly:
   ]
 }"""
 
-
 DEFAULT_EMOJI_GENERATION_PROMPT_TEMPLATE = """Your task is to reflect the speaker's likely facial expression through a fitting emoji. Interpret emotions from the message and reflect their facial expression using fitting, diverse emojis (e.g., 😊, 😢, 😡, 😱).
 
 Message: ```{{prompt}}```"""
@@ -1323,7 +1300,6 @@ DEFAULT_MOA_GENERATION_PROMPT_TEMPLATE = """You have been provided with a set of
 Your task is to synthesize these responses into a single, high-quality response. It is crucial to critically evaluate the information provided in these responses, recognizing that some of it may be biased or incorrect. Your response should not simply replicate the given answers but should offer a refined, accurate, and comprehensive reply to the instruction. Ensure your response is well-structured, coherent, and adheres to the highest standards of accuracy and reliability.
 
 Responses from models: {{responses}}"""
-
 
 DEFAULT_CODE_INTERPRETER_PROMPT = """
 #### Tools Available
@@ -1340,7 +1316,6 @@ DEFAULT_CODE_INTERPRETER_PROMPT = """
    - **If a link to an image, audio, or any file is provided in markdown format, ALWAYS regurgitate explicitly display it as part of the response to ensure the user can access it easily, do NOT change the link.**
 
 Ensure that the tools are effectively utilized to achieve the highest-quality analysis for the user."""
-
 
 ####################################
 # Vector Database
@@ -1492,12 +1467,12 @@ RAG_EMBEDDING_MODEL = PersistentConfig(
 log.info(f"Embedding model set: {RAG_EMBEDDING_MODEL.value}")
 
 RAG_EMBEDDING_MODEL_AUTO_UPDATE = (
-    not OFFLINE_MODE
-    and os.environ.get("RAG_EMBEDDING_MODEL_AUTO_UPDATE", "True").lower() == "true"
+        not OFFLINE_MODE
+        and os.environ.get("RAG_EMBEDDING_MODEL_AUTO_UPDATE", "True").lower() == "true"
 )
 
 RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE = (
-    os.environ.get("RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE", "True").lower() == "true"
+        os.environ.get("RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE", "True").lower() == "true"
 )
 
 RAG_EMBEDDING_BATCH_SIZE = PersistentConfig(
@@ -1518,14 +1493,13 @@ if RAG_RERANKING_MODEL.value != "":
     log.info(f"Reranking model set: {RAG_RERANKING_MODEL.value}")
 
 RAG_RERANKING_MODEL_AUTO_UPDATE = (
-    not OFFLINE_MODE
-    and os.environ.get("RAG_RERANKING_MODEL_AUTO_UPDATE", "True").lower() == "true"
+        not OFFLINE_MODE
+        and os.environ.get("RAG_RERANKING_MODEL_AUTO_UPDATE", "True").lower() == "true"
 )
 
 RAG_RERANKING_MODEL_TRUST_REMOTE_CODE = (
-    os.environ.get("RAG_RERANKING_MODEL_TRUST_REMOTE_CODE", "True").lower() == "true"
+        os.environ.get("RAG_RERANKING_MODEL_TRUST_REMOTE_CODE", "True").lower() == "true"
 )
-
 
 RAG_TEXT_SPLITTER = PersistentConfig(
     "RAG_TEXT_SPLITTER",
@@ -1533,14 +1507,12 @@ RAG_TEXT_SPLITTER = PersistentConfig(
     os.environ.get("RAG_TEXT_SPLITTER", ""),
 )
 
-
 TIKTOKEN_CACHE_DIR = os.environ.get("TIKTOKEN_CACHE_DIR", f"{CACHE_DIR}/tiktoken")
 TIKTOKEN_ENCODING_NAME = PersistentConfig(
     "TIKTOKEN_ENCODING_NAME",
     "rag.tiktoken_encoding_name",
     os.environ.get("TIKTOKEN_ENCODING_NAME", "cl100k_base"),
 )
-
 
 CHUNK_SIZE = PersistentConfig(
     "CHUNK_SIZE", "rag.chunk_size", int(os.environ.get("CHUNK_SIZE", "1000"))
@@ -1611,9 +1583,8 @@ RAG_OLLAMA_API_KEY = PersistentConfig(
     os.getenv("RAG_OLLAMA_API_KEY", ""),
 )
 
-
 ENABLE_RAG_LOCAL_WEB_FETCH = (
-    os.getenv("ENABLE_RAG_LOCAL_WEB_FETCH", "False").lower() == "true"
+        os.getenv("ENABLE_RAG_LOCAL_WEB_FETCH", "False").lower() == "true"
 )
 
 YOUTUBE_LOADER_LANGUAGE = PersistentConfig(
@@ -1627,7 +1598,6 @@ YOUTUBE_LOADER_PROXY_URL = PersistentConfig(
     "rag.youtube_loader_proxy_url",
     os.getenv("YOUTUBE_LOADER_PROXY_URL", ""),
 )
-
 
 ENABLE_RAG_WEB_SEARCH = PersistentConfig(
     "ENABLE_RAG_WEB_SEARCH",
@@ -1652,7 +1622,6 @@ RAG_WEB_SEARCH_DOMAIN_FILTER_LIST = PersistentConfig(
         # "wikidata.org",
     ],
 )
-
 
 SEARXNG_QUERY_URL = PersistentConfig(
     "SEARXNG_QUERY_URL",
@@ -1770,7 +1739,6 @@ RAG_WEB_SEARCH_CONCURRENT_REQUESTS = PersistentConfig(
     int(os.getenv("RAG_WEB_SEARCH_CONCURRENT_REQUESTS", "10")),
 )
 
-
 ####################################
 # Images
 ####################################
@@ -1813,7 +1781,6 @@ AUTOMATIC1111_CFG_SCALE = PersistentConfig(
         else None
     ),
 )
-
 
 AUTOMATIC1111_SAMPLER = PersistentConfig(
     "AUTOMATIC1111_SAMPLER",
@@ -1957,7 +1924,6 @@ COMFYUI_DEFAULT_WORKFLOW = """
 }
 """
 
-
 COMFYUI_WORKFLOW = PersistentConfig(
     "COMFYUI_WORKFLOW",
     "image_generation.comfyui.workflow",
@@ -2008,10 +1974,9 @@ WHISPER_MODEL = PersistentConfig(
 
 WHISPER_MODEL_DIR = os.getenv("WHISPER_MODEL_DIR", f"{CACHE_DIR}/whisper/models")
 WHISPER_MODEL_AUTO_UPDATE = (
-    not OFFLINE_MODE
-    and os.environ.get("WHISPER_MODEL_AUTO_UPDATE", "").lower() == "true"
+        not OFFLINE_MODE
+        and os.environ.get("WHISPER_MODEL_AUTO_UPDATE", "").lower() == "true"
 )
-
 
 AUDIO_STT_OPENAI_API_BASE_URL = PersistentConfig(
     "AUDIO_STT_OPENAI_API_BASE_URL",
@@ -2060,7 +2025,6 @@ AUDIO_TTS_ENGINE = PersistentConfig(
     os.getenv("AUDIO_TTS_ENGINE", ""),
 )
 
-
 AUDIO_TTS_MODEL = PersistentConfig(
     "AUDIO_TTS_MODEL",
     "audio.tts.model",
@@ -2092,7 +2056,6 @@ AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT = PersistentConfig(
         "AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT", "audio-24khz-160kbitrate-mono-mp3"
     ),
 )
-
 
 ####################################
 # LDAP
@@ -2170,9 +2133,8 @@ LDAP_CIPHERS = PersistentConfig(
     "LDAP_CIPHERS", "ldap.server.ciphers", os.environ.get("LDAP_CIPHERS", "ALL")
 )
 
-
 ####################################
 # dify
 ####################################
 
-FOSUN_AGENT_MODEL = os.environ.get("DIFY_AGENT_MODEL", "fosun-agent")
+FOSUN_AGENT_MODEL = os.environ.get("DIFY_AGENT_MODEL", "AI-Agent")
