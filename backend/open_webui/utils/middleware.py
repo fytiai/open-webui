@@ -82,7 +82,7 @@ from open_webui.tasks import create_task
 from open_webui.config import (
     CACHE_DIR,
     DEFAULT_TOOLS_FUNCTION_CALLING_PROMPT_TEMPLATE,
-    DEFAULT_CODE_INTERPRETER_PROMPT,
+    DEFAULT_CODE_INTERPRETER_PROMPT, FOSUN_AGENT_MODEL,
 )
 from open_webui.env import (
     SRC_LOG_LEVELS,
