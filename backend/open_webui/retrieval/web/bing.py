@@ -43,38 +43,3 @@ def search_bing(
     except Exception as ex:
         log.error(f"Error: {ex}")
         raise ex
-
-
-
-
-# if __name__ == "__main__":
-    # main("https://fosun-lcp-clickpaas.oss-cn-shanghai.aliyuncs.com/fosun-dify-files-images/1221489743.pdf",
-    #      "1221489743.pdf")
-
-    # parser = argparse.ArgumentParser(description="Search Bing from the command line.")
-    # parser.add_argument(
-    #     "query",
-    #     type=str,
-    #     default="Top 5 international news today",
-    #     help="The search query.",
-    # )
-    # parser.add_argument(
-    #     "--count", type=int, default=5, help="Number of search results to return."
-    # )
-    # parser.add_argument(
-    #     "--filter", nargs="*", help="List of filters to apply to the search results."
-    # )
-    # parser.add_argument(
-    #     "--locale",
-    #     type=str,
-    #     default="en-US",
-    #     help="The locale to use for the search, maps to market in api",
-    # )
-    #
-    # # args = parser.parse_args()
-    #
-    # # results = search_bing(args.locale, args.query, args.count, args.filter)
-    #
-    # results = search_bing("","https://api.bing.microsoft.com/v7.0/search","zh-CN", "", 5, None)
-    #
-    # pprint(results)
