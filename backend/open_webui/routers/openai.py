@@ -766,7 +766,8 @@ async def proxy(path: str, request: Request, user=Depends(get_verified_user)):
     streaming = False
 
     try:
-        session = aiohttp.ClientSession(trust_env=True)
+        timeout = aiohttp.ClientTimeout(connect=5.0, total=300.0)  # Set connection and total timeout
+        session = aiohttp.ClientSession(timeout=timeout, trust_env=True)
         r = await session.request(
             method=request.method,
             url=f"{url}/{path}",
@@ -792,7 +793,7 @@ async def proxy(path: str, request: Request, user=Depends(get_verified_user)):
         if "text/event-stream" in r.headers.get("Content-Type", ""):
             streaming = True
             return StreamingResponse(
-                r.content,
+                r.content.iter_any(),
                 status_code=r.status,
                 headers=dict(r.headers),
                 background=BackgroundTask(
@@ -802,7 +803,11 @@ async def proxy(path: str, request: Request, user=Depends(get_verified_user)):
         else:
             response_data = await r.json()
             return response_data
-
+    except asyncio.TimeoutError:
+        raise HTTPException(
+            status_code=504,
+            detail="Request to OpenAI API timed out."
+        )
     except Exception as e:
         log.exception(e)
 
@@ -817,7 +822,7 @@ async def proxy(path: str, request: Request, user=Depends(get_verified_user)):
                 detail = f"External: {e}"
         raise HTTPException(
             status_code=r.status if r else 500,
-            detail=detail if detail else "Fosun DeepSeek : Server Connection Error",
+            detail=detail if detail else "Fosun DeepSeek: Server Connection Error",
         )
     finally:
         if not streaming and session:
