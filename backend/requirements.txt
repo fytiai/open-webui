@@ -116,3 +116,13 @@ ldap3==2.9.1
 
 ## Firecrawl
 firecrawl-py==1.12.0
+
+## 扩展依赖
+aiodns==3.2.0
+cssselect==1.2.0
+pycares==4.5.0
+lxml==5.3.1            # 基础XML处理
+lxml-html-clean==0.1.0 # 独立的HTML清理模块
+readability-lxml==0.8.1 # 必须与lxml 5.x兼容的版本
+async_lru==2.0.4
+html2text==2024.2.26
