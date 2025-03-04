@@ -129,7 +129,7 @@ async def chat_completion_tools_handler(
             "metadata": {"task": str(TASKS.FUNCTION_CALLING)},
         }
 
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         body["model"],
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -639,7 +639,7 @@ async def process_chat_payload(request, form_data, metadata, user, model):
     else:
         models = request.app.state.MODELS
 
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         form_data["model"],
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,

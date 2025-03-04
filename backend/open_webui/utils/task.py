@@ -16,7 +16,7 @@ log.setLevel(SRC_LOG_LEVELS["RAG"])
 
 def get_task_model_id(
         default_model_id: str, task_model: str, task_model_external: str, models
-) -> Tuple[str, List[str]]:
+) -> str:
     # Set the task model
     task_model_id = default_model_id
     # Check if the user has a custom task model and use that model
@@ -24,11 +24,10 @@ def get_task_model_id(
         if task_model and task_model in models:
             task_model_id = task_model
     else:
-        if task_model_external and task_model_external not in models:
+        if task_model_external and task_model_external in models:
             task_model_id = task_model_external
-            models.append(task_model_external)
 
-    return task_model_id, models
+    return task_model_id
 
 
 def prompt_variables_template(template: str, variables: dict[str, str]) -> str:

@@ -168,7 +168,7 @@ async def generate_title(
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -265,7 +265,7 @@ async def generate_chat_tags(
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -333,7 +333,7 @@ async def generate_image_prompt(
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -419,7 +419,7 @@ async def generate_queries(
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -455,11 +455,13 @@ async def generate_queries(
     try:
         payload = await process_pipeline_inlet_filter(request, payload, user, models)
     except Exception as e:
+        log.exception(e)
         raise e
 
     try:
         return await generate_chat_completion(request, form_data=payload, user=user)
     except Exception as e:
+        log.exception(e)
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": str(e)},
@@ -506,7 +508,7 @@ async def generate_autocompletion(
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -574,7 +576,7 @@ async def generate_emoji(
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -649,7 +651,7 @@ async def generate_moa_response(
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id, models = get_task_model_id(
+    task_model_id = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
