@@ -162,11 +162,11 @@ async def generate_title(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    if model_id not in models:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
-        )
+    # if model_id not in models:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Model not found",
+    #     )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
@@ -260,11 +260,11 @@ async def generate_chat_tags(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    if model_id not in models:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
-        )
+    # if model_id not in models:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Model not found",
+    #     )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
@@ -328,11 +328,11 @@ async def generate_image_prompt(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    if model_id not in models:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
-        )
+    # if model_id not in models:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Model not found",
+    #     )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
@@ -415,11 +415,11 @@ async def generate_queries(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    if model_id not in models:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
-        )
+    # if model_id not in models:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Model not found",
+    #     )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
@@ -502,11 +502,11 @@ async def generate_autocompletion(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    if model_id not in models:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
-        )
+    # if model_id not in models:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Model not found",
+    #     )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
@@ -571,11 +571,11 @@ async def generate_emoji(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    if model_id not in models:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
-        )
+    # if model_id not in models:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Model not found",
+    #     )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
@@ -647,11 +647,11 @@ async def generate_moa_response(
 
     model_id = form_data["model"]
 
-    if model_id not in models:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
-        )
+    # if model_id not in models:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_404_NOT_FOUND,
+    #         detail="Model not found",
+    #     )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model

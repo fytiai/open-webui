@@ -26,7 +26,9 @@ def get_task_model_id(
         if task_model and task_model in models:
             task_model_id = task_model
     else:
-        if task_model_external and task_model_external in models:
+        # if task_model_external and task_model_external in models:
+        if task_model_external:
+
             task_model_id = task_model_external
 
     return task_model_id
