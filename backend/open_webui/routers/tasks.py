@@ -37,7 +37,6 @@ from open_webui.config import (
 )
 from open_webui.env import SRC_LOG_LEVELS
 
-
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MODELS"])
 
@@ -88,7 +87,7 @@ class TaskConfigForm(BaseModel):
 
 @router.post("/config/update")
 async def update_task_config(
-    request: Request, form_data: TaskConfigForm, user=Depends(get_admin_user)
+        request: Request, form_data: TaskConfigForm, user=Depends(get_admin_user)
 ):
     request.app.state.config.TASK_MODEL = form_data.TASK_MODEL
     request.app.state.config.TASK_MODEL_EXTERNAL = form_data.TASK_MODEL_EXTERNAL
@@ -145,9 +144,8 @@ async def update_task_config(
 
 @router.post("/title/completions")
 async def generate_title(
-    request: Request, form_data: dict, user=Depends(get_verified_user)
+        request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
-
     if not request.app.state.config.ENABLE_TITLE_GENERATION:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -162,15 +160,15 @@ async def generate_title(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    # if model_id not in models:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="Model not found",
-    #     )
+    if model_id not in models:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id = get_task_model_id(
+    task_model_id, models = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -243,9 +241,8 @@ async def generate_title(
 
 @router.post("/tags/completions")
 async def generate_chat_tags(
-    request: Request, form_data: dict, user=Depends(get_verified_user)
+        request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
-
     if not request.app.state.config.ENABLE_TAGS_GENERATION:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -260,15 +257,15 @@ async def generate_chat_tags(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    # if model_id not in models:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="Model not found",
-    #     )
+    if model_id not in models:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id = get_task_model_id(
+    task_model_id, models = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -318,7 +315,7 @@ async def generate_chat_tags(
 
 @router.post("/image_prompt/completions")
 async def generate_image_prompt(
-    request: Request, form_data: dict, user=Depends(get_verified_user)
+        request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
     if getattr(request.state, "direct", False) and hasattr(request.state, "model"):
         models = {
@@ -328,15 +325,15 @@ async def generate_image_prompt(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    # if model_id not in models:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="Model not found",
-    #     )
+    if model_id not in models:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id = get_task_model_id(
+    task_model_id, models = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -390,9 +387,8 @@ async def generate_image_prompt(
 
 @router.post("/queries/completions")
 async def generate_queries(
-    request: Request, form_data: dict, user=Depends(get_verified_user)
+        request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
-
     type = form_data.get("type")
     if type == "web_search":
         if not request.app.state.config.ENABLE_SEARCH_QUERY_GENERATION:
@@ -415,15 +411,15 @@ async def generate_queries(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    # if model_id not in models:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="Model not found",
-    #     )
+    if model_id not in models:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id = get_task_model_id(
+    task_model_id, models = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -472,7 +468,7 @@ async def generate_queries(
 
 @router.post("/auto/completions")
 async def generate_autocompletion(
-    request: Request, form_data: dict, user=Depends(get_verified_user)
+        request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
     if not request.app.state.config.ENABLE_AUTOCOMPLETE_GENERATION:
         raise HTTPException(
@@ -486,8 +482,8 @@ async def generate_autocompletion(
 
     if request.app.state.config.AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH > 0:
         if (
-            len(prompt)
-            > request.app.state.config.AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH
+                len(prompt)
+                > request.app.state.config.AUTOCOMPLETE_GENERATION_INPUT_MAX_LENGTH
         ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -502,15 +498,15 @@ async def generate_autocompletion(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    # if model_id not in models:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="Model not found",
-    #     )
+    if model_id not in models:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id = get_task_model_id(
+    task_model_id, models = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -560,9 +556,8 @@ async def generate_autocompletion(
 
 @router.post("/emoji/completions")
 async def generate_emoji(
-    request: Request, form_data: dict, user=Depends(get_verified_user)
+        request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
-
     if getattr(request.state, "direct", False) and hasattr(request.state, "model"):
         models = {
             request.state.model["id"]: request.state.model,
@@ -571,15 +566,15 @@ async def generate_emoji(
         models = request.app.state.MODELS
 
     model_id = form_data["model"]
-    # if model_id not in models:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="Model not found",
-    #     )
+    if model_id not in models:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id = get_task_model_id(
+    task_model_id, models = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
@@ -635,9 +630,8 @@ async def generate_emoji(
 
 @router.post("/moa/completions")
 async def generate_moa_response(
-    request: Request, form_data: dict, user=Depends(get_verified_user)
+        request: Request, form_data: dict, user=Depends(get_verified_user)
 ):
-
     if getattr(request.state, "direct", False) and hasattr(request.state, "model"):
         models = {
             request.state.model["id"]: request.state.model,
@@ -647,15 +641,15 @@ async def generate_moa_response(
 
     model_id = form_data["model"]
 
-    # if model_id not in models:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_404_NOT_FOUND,
-    #         detail="Model not found",
-    #     )
+    if model_id not in models:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
 
     # Check if the user has a custom task model
     # If the user has a custom task model, use that model
-    task_model_id = get_task_model_id(
+    task_model_id, models = get_task_model_id(
         model_id,
         request.app.state.config.TASK_MODEL,
         request.app.state.config.TASK_MODEL_EXTERNAL,
