@@ -4,7 +4,7 @@
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { functions, models } from '$lib/stores';
+	import { config, functions, models, settings } from '$lib/stores';
 	import { updateFunctionById, getFunctions, getFunctionById } from '$lib/apis/functions';
 
 	import FunctionEditor from '$lib/components/admin/Functions/FunctionEditor.svelte';
@@ -25,7 +25,7 @@
 			console.log('Version is lower than required');
 			toast.error(
 				$i18n.t(
-					'Open WebUI version (v{{OPEN_WEBUI_VERSION}}) is lower than required version (v{{REQUIRED_VERSION}})',
+					'Fosun DeepSeek  version (v{{OPEN_WEBUI_VERSION}}) is lower than required version (v{{REQUIRED_VERSION}})',
 					{
 						OPEN_WEBUI_VERSION: WEBUI_VERSION,
 						REQUIRED_VERSION: manifest?.required_open_webui_version ?? '0.0.0'
@@ -48,7 +48,12 @@
 		if (res) {
 			toast.success($i18n.t('Function updated successfully'));
 			functions.set(await getFunctions(localStorage.token));
-			models.set(await getModels(localStorage.token));
+			models.set(
+				await getModels(
+					localStorage.token,
+					$config?.features?.enable_direct_connections && ($settings?.directConnections ?? null)
+				)
+			);
 		}
 	};
 
@@ -75,8 +80,8 @@
 		name={func.name}
 		meta={func.meta}
 		content={func.content}
-		on:save={(e) => {
-			saveHandler(e.detail);
+		onSave={(value) => {
+			saveHandler(value);
 		}}
 	/>
 {:else}

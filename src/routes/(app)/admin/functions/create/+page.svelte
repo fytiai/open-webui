@@ -3,7 +3,7 @@
 	import { onMount, getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	import { functions, models } from '$lib/stores';
+	import { config, functions, models, settings } from '$lib/stores';
 	import { createNewFunction, getFunctions } from '$lib/apis/functions';
 	import FunctionEditor from '$lib/components/admin/Functions/FunctionEditor.svelte';
 	import { getModels } from '$lib/apis';
@@ -24,7 +24,7 @@
 			console.log('Version is lower than required');
 			toast.error(
 				$i18n.t(
-					'Open WebUI version (v{{OPEN_WEBUI_VERSION}}) is lower than required version (v{{REQUIRED_VERSION}})',
+					'Fosun DeepSeek  version (v{{OPEN_WEBUI_VERSION}}) is lower than required version (v{{REQUIRED_VERSION}})',
 					{
 						OPEN_WEBUI_VERSION: WEBUI_VERSION,
 						REQUIRED_VERSION: manifest?.required_open_webui_version ?? '0.0.0'
@@ -47,7 +47,12 @@
 		if (res) {
 			toast.success($i18n.t('Function created successfully'));
 			functions.set(await getFunctions(localStorage.token));
-			models.set(await getModels(localStorage.token));
+			models.set(
+				await getModels(
+					localStorage.token,
+					$config?.features?.enable_direct_connections && ($settings?.directConnections ?? null)
+				)
+			);
 
 			await goto('/admin/functions');
 		}
@@ -90,8 +95,8 @@
 			meta={func?.meta ?? { description: '' }}
 			content={func?.content ?? ''}
 			{clone}
-			on:save={(e) => {
-				saveHandler(e.detail);
+			onSave={(value) => {
+				saveHandler(value);
 			}}
 		/>
 	{/key}

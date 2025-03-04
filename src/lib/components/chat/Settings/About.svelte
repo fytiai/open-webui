@@ -92,7 +92,7 @@
 		</div>
 
 		{#if ollamaVersion}
-			<hr class=" dark:border-gray-850" />
+			<hr class=" border-gray-100 dark:border-gray-850" />
 
 			<div>
 				<div class=" mb-2.5 text-sm font-medium">{$i18n.t('Ollama Version')}</div>
@@ -104,7 +104,7 @@
 			</div>
 		{/if}
 
-		<hr class=" dark:border-gray-850" />
+		<hr class=" border-gray-100 dark:border-gray-850" />
 
 		<div class="mt-2 text-xs text-gray-400 dark:text-gray-500">
 			Emoji graphics provided by
@@ -140,7 +140,7 @@
 				class="text-xs text-gray-400 dark:text-gray-500">Copyright (c) {new Date().getFullYear()} <a
 					href="https://openwebui.com"
 					target="_blank"
-					class="underline">Open WebUI (Timothy Jaeryang Baek)</a
+					class="underline">Fosun DeepSeek  (Timothy Jaeryang Baek)</a
 				>
 All rights reserved.
 
@@ -172,7 +172,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		</div>
 
 		<div class="mt-2 text-xs text-gray-400 dark:text-gray-500">
-			{#if !$WEBUI_NAME.includes('Open WebUI')}
+			{#if !$WEBUI_NAME.includes('Fosun DeepSeek ')}
 				<span class=" text-gray-500 dark:text-gray-300 font-medium">{$WEBUI_NAME}</span> -
 			{/if}
 			{$i18n.t('Created by')}

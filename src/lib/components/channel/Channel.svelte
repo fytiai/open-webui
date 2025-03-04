@@ -195,7 +195,7 @@
 </script>
 
 <svelte:head>
-	<title>#{channel?.name ?? 'Channel'} | Open WebUI</title>
+	<title>#{channel?.name ?? 'Channel'} | Fosun DeepSeek</title>
 </svelte:head>
 
 <div
@@ -281,7 +281,7 @@
 			<PaneResizer
 				class="relative flex w-[3px] items-center justify-center bg-background group bg-gray-50 dark:bg-gray-850"
 			>
-				<div class="z-10 flex h-7 w-5 items-center justify-center rounded-sm">
+				<div class="z-10 flex h-7 w-5 items-center justify-center rounded-xs">
 					<EllipsisVertical className="size-4 invisible group-hover:visible" />
 				</div>
 			</PaneResizer>

@@ -21,11 +21,18 @@
 			title="Fosun DeepSeek"
 			href="/opensearch.xml"
 		/>
+		<script src="/static/loader.js" defer></script>
 
 		<script>
 			function resizeIframe(obj) {
 				obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
 			}
+		</script>
+
+		<script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+		<script>
+		// VConsole 默认会挂载到 `window.VConsole` 上
+		var vConsole = new window.VConsole();
 		</script>
 
 		<script>
