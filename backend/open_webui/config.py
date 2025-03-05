@@ -2440,4 +2440,4 @@ LDAP_CIPHERS = PersistentConfig(
 # dify
 ####################################
 
-FOSUN_AGENT_MODEL = os.environ.get("DIFY_AGENT_MODEL", "AI-Agent")
+FOSUN_AGENT_MODEL = os.environ.get("DIFY_AGENT_MODEL", "dify-AI-Agent")
