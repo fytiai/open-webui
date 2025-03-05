@@ -601,7 +601,7 @@ async def generate_chat_completion(
         payload = apply_model_params_to_body_openai(params, payload)
         payload = apply_model_system_prompt_to_body(params, payload, metadata, user)
 
-        log.debug(f"generate_chat_completion payload: {payload}")
+        log.debug(f"generate_chat_completion1 payload: {payload}")
         # Check if user has access to the model
         if not bypass_filter and user.role == "user":
             if not (
@@ -670,6 +670,8 @@ async def generate_chat_completion(
 
     # Convert the modified body back to JSON
     payload = json.dumps(payload)
+
+    log.debug(f"generate_chat_completion2 payload: {payload}")
 
     r = None
     session = None
