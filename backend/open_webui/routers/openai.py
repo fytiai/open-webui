@@ -668,6 +668,7 @@ async def generate_chat_completion(
     if "max_tokens" in payload and "max_completion_tokens" in payload:
         del payload["max_tokens"]
 
+    log.debug(f"Before is_dify payload adjustment: {payload}, with metadata: {metadata}")
     is_dify = payload["model"].lower().startswith(("dify"))
     if is_dify:
         log.debug(f"generate_chat_completion is_dify payload !!!")
