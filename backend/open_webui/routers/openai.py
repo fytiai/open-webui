@@ -586,10 +586,9 @@ async def generate_chat_completion(
     idx = 0
 
     payload = {**form_data}
-
-    log.debug(f"generate_chat_completion payload: {payload}")
-
     metadata = payload.pop("metadata", None)
+
+    log.debug(f"generate_chat_completion payload: {payload}，and metadata:{metadata}")
     model_id = form_data.get("model")
     model_info = Models.get_model_by_id(model_id)
 
@@ -668,7 +667,8 @@ async def generate_chat_completion(
             payload["max_tokens"] = payload["max_completion_tokens"]
             del payload["max_completion_tokens"]
     elif is_dify:
-        payload["chat_id"] = metadata.get("chat_id", "")
+        log.debug(f"generate_chat_completion is_dify payload !!!")
+        payload["chat_id"] = metadata.get("chat_id",None)
     if "max_tokens" in payload and "max_completion_tokens" in payload:
         del payload["max_tokens"]
 
