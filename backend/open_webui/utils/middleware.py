@@ -606,6 +606,9 @@ def apply_params_to_form_data(form_data, model):
         if "reasoning_effort" in params:
             form_data["reasoning_effort"] = params["reasoning_effort"]
 
+        if "chat_id" in params:
+            form_data["chat_id"] = params["chat_id"]
+
     return form_data
 
 
