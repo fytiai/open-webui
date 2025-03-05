@@ -586,8 +586,10 @@ async def generate_chat_completion(
     idx = 0
 
     payload = {**form_data}
-    metadata = payload.pop("metadata", None)
 
+    log.debug(f"generate_chat_completion payload: {payload}")
+
+    metadata = payload.pop("metadata", None)
     model_id = form_data.get("model")
     model_info = Models.get_model_by_id(model_id)
 
@@ -657,6 +659,7 @@ async def generate_chat_completion(
 
     # Fix: o1,o3 does not support the "max_tokens" parameter, Modify "max_tokens" to "max_completion_tokens"
     is_o1_o3 = payload["model"].lower().startswith(("o1", "o3-"))
+    is_dify = payload["model"].lower().startswith(("dify"))
     if is_o1_o3:
         payload = openai_o1_o3_handler(payload)
     elif "api.openai.com" not in url:
@@ -664,7 +667,8 @@ async def generate_chat_completion(
         if "max_completion_tokens" in payload:
             payload["max_tokens"] = payload["max_completion_tokens"]
             del payload["max_completion_tokens"]
-
+    elif is_dify:
+        payload["chat_id"] = metadata.get("chat_id", "")
     if "max_tokens" in payload and "max_completion_tokens" in payload:
         del payload["max_tokens"]
 
