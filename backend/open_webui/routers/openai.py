@@ -588,6 +588,7 @@ async def generate_chat_completion(
     payload = {**form_data}
     metadata = payload.pop("metadata", None)
 
+    log.debug(f"generate_chat_completion payload: {payload}，and metadata:{metadata}")
     model_id = form_data.get("model")
     model_info = Models.get_model_by_id(model_id)
 
@@ -601,6 +602,7 @@ async def generate_chat_completion(
         payload = apply_model_params_to_body_openai(params, payload)
         payload = apply_model_system_prompt_to_body(params, payload, metadata, user)
 
+        log.debug(f"generate_chat_completion1 payload: {payload}")
         # Check if user has access to the model
         if not bypass_filter and user.role == "user":
             if not (
@@ -663,12 +665,19 @@ async def generate_chat_completion(
         if "max_completion_tokens" in payload:
             payload["max_tokens"] = payload["max_completion_tokens"]
             del payload["max_completion_tokens"]
-
     if "max_tokens" in payload and "max_completion_tokens" in payload:
         del payload["max_tokens"]
 
+    log.debug(f"Before is_dify payload adjustment: {payload}, with metadata: {metadata}")
+    is_dify = payload["model"].lower().startswith(("dify"))
+    if is_dify:
+        log.debug(f"generate_chat_completion is_dify payload !!!")
+        payload["chat_id"] = metadata.get("chat_id", None)
+
     # Convert the modified body back to JSON
     payload = json.dumps(payload)
+
+    log.debug(f"generate_chat_completion2 payload: {payload}")
 
     r = None
     session = None

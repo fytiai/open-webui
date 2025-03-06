@@ -93,19 +93,6 @@ class SafeWebBaseLoader(WebBaseLoader):
                 log.error(f"Error loading {path}: {e}")
 
 
-def get_web_loader(
-        urls: Union[str, Sequence[str]],
-        verify_ssl: bool = False,
-        requests_per_second: int = 2,
-):
-    return OptimizedWebLoader(
-        urls=urls,
-        timeout=requests_per_second,
-        concurrency=10,
-        max_content=100000
-    )
-
-
 # ================== 异步DNS解析 ==================
 @alru_cache(maxsize=500, ttl=300)  # 使用异步缓存
 async def async_resolve_hostname(hostname: str) -> tuple[List[str], List[str]]:
@@ -235,3 +222,15 @@ class OptimizedWebLoader(WebBaseLoader):
 
         return [doc for doc in results if isinstance(doc, LangchainDocument)]
 
+
+def get_web_loader(
+        urls: Union[str, Sequence[str]],
+        verify_ssl: bool = False,
+        requests_per_second: int = 2,
+):
+    return OptimizedWebLoader(
+        urls=urls,
+        timeout=requests_per_second,
+        concurrency=10,
+        max_content=100000
+    )
