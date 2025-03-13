@@ -751,6 +751,7 @@
 													name={file.name}
 													type={file.type}
 													size={file?.size}
+													statusText={file.statusText || ''}
 													loading={file.status === 'uploading'}
 													dismissible={true}
 													edit={true}
