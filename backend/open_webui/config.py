@@ -1260,6 +1260,10 @@ Analyze the chat history to determine the necessity of generating search queries
 - Be concise and focused on composing high-quality search queries, avoiding unnecessary elaboration, commentary, or assumptions.
 - Today's date is: {{CURRENT_DATE}}.
 - Always prioritize providing actionable and broad queries that maximize informational coverage.
+- **PRIVACY PROTECTION**: Strictly avoid including any personal identifiable information (names, addresses, phone numbers, email addresses, ID numbers, etc.) in the generated queries.
+- **BUSINESS CONFIDENTIALITY**: Do not include internal financial data, revenue figures, profit margins, internal project codes, proprietary formulas, or any information that could be considered business confidential or trade secrets. Company names themselves are not considered confidential and may be included when relevant.
+- **GENERALIZATION**: Generalize sensitive topics by using broader categories instead of specific details (e.g., use "healthcare condition" instead of specific medical diagnoses, use "financial metrics" instead of specific revenue numbers).
+- **DATA MINIMIZATION**: Generate queries that seek information without revealing the specific context or details from the original conversation.
 
 ### Output:
 Strictly return in JSON format: 
