@@ -155,6 +155,9 @@
 				if (fileStatus) {
 					fileItem.processing_status = fileStatus.meta.processing_status;
 					
+					// 设置状态文本用于显示
+					fileItem.statusText = getProcessingStatusText(fileItem);
+					
 					// 更新collection_name（如果可用）
 					if (fileStatus.meta.collection_name && !fileItem.collection_name) {
 						fileItem.collection_name = fileStatus.meta.collection_name;
@@ -283,6 +286,9 @@
 				
 				// 添加处理状态
 				fileItem.processing_status = uploadedFile?.meta?.processing_status || 'processing';
+				
+				// 设置状态文本用于显示
+				fileItem.statusText = getProcessingStatusText(fileItem);
 				
 				// 如果文件仍在处理中，开始轮询状态
 				if (isFileProcessing(fileItem)) {
