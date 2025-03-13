@@ -159,11 +159,15 @@
 					
 					// 设置状态文本用于显示
 					fileItem.statusText = getProcessingStatusText(fileItem);
+					console.log('File status updated:', fileItem.id, fileItem.statusText, fileItem.processing_status);
 					
 					// 更新collection_name（如果可用）
 					if (meta.collection_name && !fileItem.collection_name) {
 						fileItem.collection_name = meta.collection_name;
 					}
+					
+					// 强制更新文件列表触发UI更新
+					files = [...files];
 					
 					// 当处理完成或出错时停止轮询
 					if (['completed', 'error'].includes(fileItem.processing_status)) {
@@ -253,6 +257,8 @@
 			size: file.size,
 			error: '',
 			itemId: tempItemId,
+			processing_status: 'uploading',
+			statusText: $i18n.t('Uploading'),
 			...(fullContext ? { context: 'full' } : {})
 		};
 
@@ -291,6 +297,10 @@
 				
 				// 设置状态文本用于显示
 				fileItem.statusText = getProcessingStatusText(fileItem);
+				console.log('Initial file status:', fileItem.id, fileItem.statusText, fileItem.processing_status);
+				
+				// 强制更新文件列表触发UI更新
+				files = [...files];
 				
 				// 如果文件仍在处理中，开始轮询状态
 				if (isFileProcessing(fileItem)) {
