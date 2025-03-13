@@ -42,15 +42,16 @@ async def upload_file(
 ):
     log.info(f"file.content_type: {file.content_type}")
     try:
-        # 检查文件大小限制（如果配置了）
-        max_file_size = getattr(request.app.state.config, "MAX_FILE_SIZE", None)
-        if max_file_size:
-            # 尝试获取文件大小（如果可用）
-            if hasattr(file, "size") and file.size > max_file_size:
-                raise HTTPException(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    detail=f"文件大小超过限制 ({max_file_size} 字节)",
-                )
+        # 前端已经有文件大小限制检查，这里不再重复检查
+        # 如果需要后端校验，可以取消注释下面的代码
+        # max_file_size = getattr(request.app.state.config, "MAX_FILE_SIZE", None)
+        # if max_file_size:
+        #     # 尝试获取文件大小（如果可用）
+        #     if hasattr(file, "size") and file.size > max_file_size:
+        #         raise HTTPException(
+        #             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+        #             detail=f"文件大小超过限制 ({max_file_size} 字节)",
+        #         )
 
         unsanitized_filename = file.filename
         filename = os.path.basename(unsanitized_filename)
