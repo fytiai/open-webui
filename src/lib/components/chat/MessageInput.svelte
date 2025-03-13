@@ -3,7 +3,6 @@
 	import { v4 as uuidv4 } from 'uuid';
 	import { createPicker, getAuthToken } from '$lib/utils/google-drive-picker';
 	import { pickAndDownloadFile } from '$lib/utils/onedrive-file-picker';
-
 	import { onMount, tick, getContext, createEventDispatcher, onDestroy } from 'svelte';
 	const dispatch = createEventDispatcher();
 
@@ -104,6 +103,88 @@
 		(model) => $models.find((m) => m.id === model)?.info?.meta?.capabilities?.vision ?? true
 	);
 
+	// 添加文件处理状态的翻译映射
+	const processingStatusMap = {
+		uploaded: $i18n.t('Uploaded'),
+		processing: $i18n.t('Processing'),
+		extracting_content: $i18n.t('Extracting content'),
+		updating_data: $i18n.t('Updating data'),
+		generating_embeddings: $i18n.t('Generating embeddings'),
+		completed: $i18n.t('Completed'),
+		error: $i18n.t('Error')
+	};
+	
+	// 获取处理状态显示文本
+	const getProcessingStatusText = (file) => {
+		if (file.status === 'uploading') return $i18n.t('Uploading');
+		return processingStatusMap[file.processing_status] || $i18n.t('Processing');
+	};
+	
+	// 检查文件是否仍在处理中
+	const isFileProcessing = (file) => {
+		return file.status === 'uploading' || 
+			(file.processing_status && 
+			['uploaded', 'processing', 'extracting_content', 'updating_data', 'generating_embeddings'].includes(file.processing_status));
+	};
+	
+	// 获取文件状态的API函数
+	const getFileStatus = async (token, fileId) => {
+		try {
+			const response = await fetch(`${WEBUI_API_BASE_URL}/files/${fileId}/status`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			});
+			if (response.ok) {
+				return await response.json();
+			} else {
+				throw new Error(`Failed to get file status: ${response.status}`);
+			}
+		} catch (e) {
+			throw new Error(`Failed to get file status: ${e.message}`);
+		}
+	};
+	
+	// 轮询文件状态的函数
+	const pollFileStatus = async (fileId, fileItem) => {
+		const intervalId = setInterval(async () => {
+			try {
+				const fileStatus = await getFileStatus(localStorage.token, fileId);
+				if (fileStatus) {
+					fileItem.processing_status = fileStatus.meta.processing_status;
+					
+					// 更新collection_name（如果可用）
+					if (fileStatus.meta.collection_name && !fileItem.collection_name) {
+						fileItem.collection_name = fileStatus.meta.collection_name;
+					}
+					
+					// 当处理完成或出错时停止轮询
+					if (['completed', 'error'].includes(fileStatus.meta.processing_status)) {
+						clearInterval(intervalId);
+						
+						// 刷新文件列表以更新UI
+						files = files;
+						
+						// 如果处理失败，显示错误消息
+						if (fileStatus.meta.processing_status === 'error') {
+							toast.error($i18n.t('File processing error: {{error}}', {
+								error: fileStatus.meta.processing_error || 'Unknown error'
+							}));
+						}
+					}
+				}
+			} catch (e) {
+				console.error('Error polling file status:', e);
+				clearInterval(intervalId);
+			}
+		}, 3000); // 每3秒检查一次
+		
+		// 存储intervalId以便在组件卸载时清除
+		return intervalId;
+	};
+
 	const scrollToBottom = () => {
 		const element = document.getElementById('messages-container');
 		element.scrollTo({
@@ -199,6 +280,14 @@
 				fileItem.collection_name =
 					uploadedFile?.meta?.collection_name || uploadedFile?.collection_name;
 				fileItem.url = `${WEBUI_API_BASE_URL}/files/${uploadedFile.id}`;
+				
+				// 添加处理状态
+				fileItem.processing_status = uploadedFile?.meta?.processing_status || 'processing';
+				
+				// 如果文件仍在处理中，开始轮询状态
+				if (isFileProcessing(fileItem)) {
+					pollFileStatus(fileItem.id, fileItem);
+				}
 
 				files = files;
 			} else {

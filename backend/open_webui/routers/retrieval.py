@@ -987,6 +987,13 @@ def process_file(
             file_path = file.path
             if file_path:
                 file_path = Storage.get_file(file_path)
+                
+                # 更新处理状态
+                Files.update_file_metadata_by_id(
+                    file.id, {"processing_status": "extracting_content"}
+                )
+                
+                # 使用加载器处理文件
                 loader = Loader(
                     engine=request.app.state.config.CONTENT_EXTRACTION_ENGINE,
                     TIKA_SERVER_URL=request.app.state.config.TIKA_SERVER_URL,
@@ -994,12 +1001,18 @@ def process_file(
                     DOCUMENT_INTELLIGENCE_ENDPOINT=request.app.state.config.DOCUMENT_INTELLIGENCE_ENDPOINT,
                     DOCUMENT_INTELLIGENCE_KEY=request.app.state.config.DOCUMENT_INTELLIGENCE_KEY,
                 )
-                docs = loader.load(
+                
+                # 使用生成器模式加载文档，避免一次性加载所有内容
+                docs_generator = loader.load(
                     file.filename, file.meta.get("content_type"), file_path
                 )
-
-                docs = [
-                    Document(
+                
+                # 转换生成器为文档列表，同时添加元数据
+                docs = []
+                text_content_parts = []
+                
+                for doc in docs_generator:
+                    doc_with_metadata = Document(
                         page_content=doc.page_content,
                         metadata={
                             **doc.metadata,
@@ -1009,8 +1022,11 @@ def process_file(
                             "source": file.filename,
                         },
                     )
-                    for doc in docs
-                ]
+                    docs.append(doc_with_metadata)
+                    text_content_parts.append(doc.page_content)
+                
+                # 高效地连接文本内容
+                text_content = " ".join(text_content_parts)
             else:
                 docs = [
                     Document(
@@ -1024,9 +1040,12 @@ def process_file(
                         },
                     )
                 ]
-            text_content = " ".join([doc.page_content for doc in docs])
+            text_content = file.data.get("content", "")
 
-        log.debug(f"text_content: {text_content}")
+        # 更新处理状态
+        Files.update_file_metadata_by_id(
+            file.id, {"processing_status": "updating_data"}
+        )
         Files.update_file_data_by_id(
             file.id,
             {"content": text_content},
@@ -1037,6 +1056,12 @@ def process_file(
 
         if not request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
             try:
+                # 更新处理状态
+                Files.update_file_metadata_by_id(
+                    file.id, {"processing_status": "generating_embeddings"}
+                )
+                
+                # 保存文档到向量数据库
                 result = save_docs_to_vector_db(
                     request,
                     docs=docs,
@@ -1051,10 +1076,12 @@ def process_file(
                 )
 
                 if result:
+                    # 更新文件元数据
                     Files.update_file_metadata_by_id(
                         file.id,
                         {
                             "collection_name": collection_name,
+                            "processing_status": "completed",
                         },
                     )
 
@@ -1065,8 +1092,21 @@ def process_file(
                         "content": text_content,
                     }
             except Exception as e:
+                # 更新处理状态为错误
+                Files.update_file_metadata_by_id(
+                    file.id, 
+                    {
+                        "processing_status": "error",
+                        "processing_error": str(e)
+                    }
+                )
                 raise e
         else:
+            # 更新处理状态为完成
+            Files.update_file_metadata_by_id(
+                file.id, {"processing_status": "completed"}
+            )
+            
             return {
                 "status": True,
                 "collection_name": None,

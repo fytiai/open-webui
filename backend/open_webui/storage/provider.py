@@ -58,14 +58,26 @@ class StorageProvider(ABC):
 
 class LocalStorageProvider(StorageProvider):
     @staticmethod
-    def upload_file(file: BinaryIO, filename: str) -> Tuple[bytes, str]:
-        contents = file.read()
-        if not contents:
-            raise ValueError(ERROR_MESSAGES.EMPTY_CONTENT)
+    def upload_file(file: BinaryIO, filename: str) -> Tuple[int, str]:
         file_path = f"{UPLOAD_DIR}/{filename}"
-        with open(file_path, "wb") as f:
-            f.write(contents)
-        return contents, file_path
+        
+        # 使用分块读取和写入，避免一次性加载整个文件到内存
+        chunk_size = 1024 * 1024  # 1MB 块大小
+        file_size = 0
+        
+        with open(file_path, "wb") as f_out:
+            while True:
+                chunk = file.read(chunk_size)
+                if not chunk:
+                    break
+                file_size += len(chunk)
+                f_out.write(chunk)
+        
+        if file_size == 0:
+            raise ValueError(ERROR_MESSAGES.EMPTY_CONTENT)
+            
+        # 返回文件大小和路径，而不是文件内容
+        return file_size, file_path
 
     @staticmethod
     def get_file(file_path: str) -> str:
@@ -131,14 +143,14 @@ class S3StorageProvider(StorageProvider):
         self.bucket_name = S3_BUCKET_NAME
         self.key_prefix = S3_KEY_PREFIX if S3_KEY_PREFIX else ""
 
-    def upload_file(self, file: BinaryIO, filename: str) -> Tuple[bytes, str]:
+    def upload_file(self, file: BinaryIO, filename: str) -> Tuple[int, str]:
         """Handles uploading of the file to S3 storage."""
-        _, file_path = LocalStorageProvider.upload_file(file, filename)
+        file_size, file_path = LocalStorageProvider.upload_file(file, filename)
         try:
             s3_key = os.path.join(self.key_prefix, filename)
             self.s3_client.upload_file(file_path, self.bucket_name, s3_key)
             return (
-                open(file_path, "rb").read(),
+                file_size,
                 "s3://" + self.bucket_name + "/" + s3_key,
             )
         except ClientError as e:
@@ -207,13 +219,13 @@ class GCSStorageProvider(StorageProvider):
             self.gcs_client = storage.Client()
         self.bucket = self.gcs_client.bucket(GCS_BUCKET_NAME)
 
-    def upload_file(self, file: BinaryIO, filename: str) -> Tuple[bytes, str]:
+    def upload_file(self, file: BinaryIO, filename: str) -> Tuple[int, str]:
         """Handles uploading of the file to GCS storage."""
-        contents, file_path = LocalStorageProvider.upload_file(file, filename)
+        file_size, file_path = LocalStorageProvider.upload_file(file, filename)
         try:
             blob = self.bucket.blob(filename)
             blob.upload_from_filename(file_path)
-            return contents, "gs://" + self.bucket_name + "/" + filename
+            return file_size, f"gs://{self.bucket_name}/{filename}"
         except GoogleCloudError as e:
             raise RuntimeError(f"Error uploading file to GCS: {e}")
 
@@ -277,13 +289,14 @@ class AzureStorageProvider(StorageProvider):
             self.container_name
         )
 
-    def upload_file(self, file: BinaryIO, filename: str) -> Tuple[bytes, str]:
+    def upload_file(self, file: BinaryIO, filename: str) -> Tuple[int, str]:
         """Handles uploading of the file to Azure Blob Storage."""
-        contents, file_path = LocalStorageProvider.upload_file(file, filename)
+        file_size, file_path = LocalStorageProvider.upload_file(file, filename)
         try:
             blob_client = self.container_client.get_blob_client(filename)
-            blob_client.upload_blob(contents, overwrite=True)
-            return contents, f"{self.endpoint}/{self.container_name}/{filename}"
+            with open(file_path, "rb") as data:
+                blob_client.upload_blob(data, overwrite=True)
+            return file_size, f"{self.endpoint}/{self.container_name}/{filename}"
         except Exception as e:
             raise RuntimeError(f"Error uploading file to Azure Blob Storage: {e}")
 

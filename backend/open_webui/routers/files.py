@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Request, UploadFile, status
 from fastapi.responses import FileResponse, StreamingResponse
 from open_webui.constants import ERROR_MESSAGES
 from open_webui.env import SRC_LOG_LEVELS
@@ -33,14 +33,25 @@ router = APIRouter()
 
 
 @router.post("/", response_model=FileModelResponse)
-def upload_file(
+async def upload_file(
     request: Request,
     file: UploadFile = File(...),
     user=Depends(get_verified_user),
     file_metadata: dict = {},
+    background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
     log.info(f"file.content_type: {file.content_type}")
     try:
+        # 检查文件大小限制（如果配置了）
+        max_file_size = getattr(request.app.state.config, "MAX_FILE_SIZE", None)
+        if max_file_size:
+            # 尝试获取文件大小（如果可用）
+            if hasattr(file, "size") and file.size > max_file_size:
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail=f"文件大小超过限制 ({max_file_size} 字节)",
+                )
+
         unsanitized_filename = file.filename
         filename = os.path.basename(unsanitized_filename)
 
@@ -48,7 +59,9 @@ def upload_file(
         id = str(uuid.uuid4())
         name = filename
         filename = f"{id}_{filename}"
-        contents, file_path = Storage.upload_file(file.file, filename)
+        
+        # 使用修改后的 Storage.upload_file 方法
+        file_size, file_path = Storage.upload_file(file.file, filename)
 
         file_item = Files.insert_new_file(
             user.id,
@@ -60,48 +73,59 @@ def upload_file(
                     "meta": {
                         "name": name,
                         "content_type": file.content_type,
-                        "size": len(contents),
+                        "size": file_size,  # 使用实际文件大小
+                        "processing_status": "uploaded",  # 添加处理状态
                         "data": file_metadata,
                     },
                 }
             ),
         )
 
-        try:
-            if file.content_type in [
-                "audio/mpeg",
-                "audio/wav",
-                "audio/ogg",
-                "audio/x-m4a",
-            ]:
-                file_path = Storage.get_file(file_path)
-                result = transcribe(request, file_path)
-                process_file(
-                    request,
-                    ProcessFileForm(file_id=id, content=result.get("text", "")),
-                    user=user,
+        # 创建后台任务处理文件，而不是同步处理
+        def process_file_in_background(request, file_id, file_content_type):
+            try:
+                # 更新文件状态为"处理中"
+                Files.update_file_metadata_by_id(
+                    file_id, {"processing_status": "processing"}
                 )
-            else:
-                process_file(request, ProcessFileForm(file_id=id), user=user)
+                
+                if file_content_type in [
+                    "audio/mpeg",
+                    "audio/wav",
+                    "audio/ogg",
+                    "audio/x-m4a",
+                ]:
+                    file_path = Storage.get_file(file_item.path)
+                    result = transcribe(request, file_path)
+                    process_file(
+                        request,
+                        ProcessFileForm(file_id=file_id, content=result.get("text", "")),
+                        user=user,
+                    )
+                else:
+                    process_file(request, ProcessFileForm(file_id=file_id), user=user)
+            except Exception as e:
+                log.exception(e)
+                log.error(f"Error processing file in background: {file_id}")
+                # 更新文件状态以反映处理错误
+                Files.update_file_metadata_by_id(
+                    file_id, 
+                    {
+                        "processing_status": "error",
+                        "processing_error": str(e.detail) if hasattr(e, "detail") else str(e)
+                    }
+                )
+        
+        # 添加后台任务
+        background_tasks.add_task(
+            process_file_in_background, 
+            request, 
+            id, 
+            file.content_type
+        )
 
-            file_item = Files.get_file_by_id(id=id)
-        except Exception as e:
-            log.exception(e)
-            log.error(f"Error processing file: {file_item.id}")
-            file_item = FileModelResponse(
-                **{
-                    **file_item.model_dump(),
-                    "error": str(e.detail) if hasattr(e, "detail") else str(e),
-                }
-            )
-
-        if file_item:
-            return file_item
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_MESSAGES.DEFAULT("Error uploading file"),
-            )
+        # 立即返回文件项，而不等待处理完成
+        return file_item
 
     except Exception as e:
         log.exception(e)
@@ -158,6 +182,24 @@ async def delete_all_files(user=Depends(get_admin_user)):
 
 @router.get("/{id}", response_model=Optional[FileModel])
 async def get_file_by_id(id: str, user=Depends(get_verified_user)):
+    file = Files.get_file_by_id(id)
+
+    if file and (file.user_id == user.id or user.role == "admin"):
+        return file
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ERROR_MESSAGES.NOT_FOUND,
+        )
+
+
+############################
+# Get File Status By Id
+############################
+
+
+@router.get("/{id}/status")
+async def get_file_status_by_id(id: str, user=Depends(get_verified_user)):
     file = Files.get_file_by_id(id)
 
     if file and (file.user_id == user.id or user.role == "admin"):
