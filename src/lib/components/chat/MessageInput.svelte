@@ -153,27 +153,29 @@
 			try {
 				const fileStatus = await getFileStatus(localStorage.token, fileId);
 				if (fileStatus) {
-					fileItem.processing_status = fileStatus.meta.processing_status;
+					// 从返回的文件对象中提取处理状态
+					const meta = fileStatus.meta || {};
+					fileItem.processing_status = meta.processing_status || 'processing';
 					
 					// 设置状态文本用于显示
 					fileItem.statusText = getProcessingStatusText(fileItem);
 					
 					// 更新collection_name（如果可用）
-					if (fileStatus.meta.collection_name && !fileItem.collection_name) {
-						fileItem.collection_name = fileStatus.meta.collection_name;
+					if (meta.collection_name && !fileItem.collection_name) {
+						fileItem.collection_name = meta.collection_name;
 					}
 					
 					// 当处理完成或出错时停止轮询
-					if (['completed', 'error'].includes(fileStatus.meta.processing_status)) {
+					if (['completed', 'error'].includes(fileItem.processing_status)) {
 						clearInterval(intervalId);
 						
 						// 刷新文件列表以更新UI
 						files = files;
 						
 						// 如果处理失败，显示错误消息
-						if (fileStatus.meta.processing_status === 'error') {
+						if (fileItem.processing_status === 'error') {
 							toast.error($i18n.t('File processing error: {{error}}', {
-								error: fileStatus.meta.processing_error || 'Unknown error'
+								error: meta.processing_error || 'Unknown error'
 							}));
 						}
 					}
