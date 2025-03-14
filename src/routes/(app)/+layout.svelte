@@ -52,6 +52,38 @@
 
 	let version;
 
+	// Check if the current language is Chinese
+	$: isChinese = $i18n?.language?.startsWith('zh-');
+
+	// Add legal notice banner for non-Chinese users
+	const addLegalNoticeBanner = () => {
+		// Only add for non-Chinese languages and if not already dismissed
+		if (!isChinese && !localStorage.getItem('china_legal_notice_dismissed')) {
+			const legalNoticeBanner = {
+				id: 'china-legal-notice',
+				type: 'warning',
+				content: $i18n.t('China Service Legal Notice'),
+				dismissible: true,
+				timestamp: Math.floor(Date.now() / 1000)
+			};
+
+			// Check if this banner already exists
+			const existingBanners = $banners || [];
+			const bannerExists = existingBanners.some((b) => b.id === 'china-legal-notice');
+
+			if (!bannerExists) {
+				banners.set([...existingBanners, legalNoticeBanner]);
+			}
+		}
+	};
+
+	// Handle banner dismissal
+	const handleBannerDismiss = (bannerId) => {
+		if (bannerId === 'china-legal-notice') {
+			localStorage.setItem('china_legal_notice_dismissed', 'true');
+		}
+	};
+
 	onMount(async () => {
 		if ($user === undefined) {
 			await goto('/auth');
@@ -101,6 +133,9 @@
 			);
 			banners.set(await getBanners(localStorage.token));
 			tools.set(await getTools(localStorage.token));
+
+			// Add legal notice banner for non-Chinese users after loading other banners
+			addLegalNoticeBanner();
 
 			document.addEventListener('keydown', async function (event) {
 				const isCtrlPressed = event.ctrlKey || event.metaKey; // metaKey is for Cmd key on Mac
@@ -210,6 +245,11 @@
 
 		loaded = true;
 	});
+
+	// Listen for language changes and update the legal notice banner accordingly
+	$: if ($i18n?.language) {
+		addLegalNoticeBanner();
+	}
 
 	const checkForVersionUpdates = async () => {
 		version = await getVersionUpdates(localStorage.token).catch((error) => {

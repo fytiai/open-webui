@@ -113,20 +113,28 @@
 		completed: $i18n.t('Completed'),
 		error: $i18n.t('Error')
 	};
-	
+
 	// 获取处理状态显示文本
 	const getProcessingStatusText = (file) => {
 		if (file.status === 'uploading') return $i18n.t('Uploading');
 		return processingStatusMap[file.processing_status] || $i18n.t('Processing');
 	};
-	
+
 	// 检查文件是否仍在处理中
 	const isFileProcessing = (file) => {
-		return file.status === 'uploading' || 
-			(file.processing_status && 
-			['uploaded', 'processing', 'extracting_content', 'updating_data', 'generating_embeddings'].includes(file.processing_status));
+		return (
+			file.status === 'uploading' ||
+			(file.processing_status &&
+				[
+					'uploaded',
+					'processing',
+					'extracting_content',
+					'updating_data',
+					'generating_embeddings'
+				].includes(file.processing_status))
+		);
 	};
-	
+
 	// 获取文件状态的API函数
 	const getFileStatus = async (token, fileId) => {
 		try {
@@ -146,7 +154,7 @@
 			throw new Error(`Failed to get file status: ${e.message}`);
 		}
 	};
-	
+
 	// 轮询文件状态的函数
 	const pollFileStatus = async (fileId, fileItem) => {
 		const intervalId = setInterval(async () => {
@@ -156,31 +164,38 @@
 					// 从返回的文件对象中提取处理状态
 					const meta = fileStatus.meta || {};
 					fileItem.processing_status = meta.processing_status || 'processing';
-					
+
 					// 设置状态文本用于显示
 					fileItem.statusText = getProcessingStatusText(fileItem);
-					console.log('File status updated:', fileItem.id, fileItem.statusText, fileItem.processing_status);
-					
+					console.log(
+						'File status updated:',
+						fileItem.id,
+						fileItem.statusText,
+						fileItem.processing_status
+					);
+
 					// 更新collection_name（如果可用）
 					if (meta.collection_name && !fileItem.collection_name) {
 						fileItem.collection_name = meta.collection_name;
 					}
-					
+
 					// 强制更新文件列表触发UI更新
 					files = [...files];
-					
+
 					// 当处理完成或出错时停止轮询
 					if (['completed', 'error'].includes(fileItem.processing_status)) {
 						clearInterval(intervalId);
-						
+
 						// 刷新文件列表以更新UI
 						files = files;
-						
+
 						// 如果处理失败，显示错误消息
 						if (fileItem.processing_status === 'error') {
-							toast.error($i18n.t('File processing error: {{error}}', {
-								error: meta.processing_error || 'Unknown error'
-							}));
+							toast.error(
+								$i18n.t('File processing error: {{error}}', {
+									error: meta.processing_error || 'Unknown error'
+								})
+							);
 						}
 					}
 				}
@@ -189,7 +204,7 @@
 				clearInterval(intervalId);
 			}
 		}, 3000); // 每3秒检查一次
-		
+
 		// 存储intervalId以便在组件卸载时清除
 		return intervalId;
 	};
@@ -291,17 +306,22 @@
 				fileItem.collection_name =
 					uploadedFile?.meta?.collection_name || uploadedFile?.collection_name;
 				fileItem.url = `${WEBUI_API_BASE_URL}/files/${uploadedFile.id}`;
-				
+
 				// 添加处理状态
 				fileItem.processing_status = uploadedFile?.meta?.processing_status || 'processing';
-				
+
 				// 设置状态文本用于显示
 				fileItem.statusText = getProcessingStatusText(fileItem);
-				console.log('Initial file status:', fileItem.id, fileItem.statusText, fileItem.processing_status);
-				
+				console.log(
+					'Initial file status:',
+					fileItem.id,
+					fileItem.statusText,
+					fileItem.processing_status
+				);
+
 				// 强制更新文件列表触发UI更新
 				files = [...files];
-				
+
 				// 如果文件仍在处理中，开始轮询状态
 				if (isFileProcessing(fileItem)) {
 					pollFileStatus(fileItem.id, fileItem);
@@ -312,9 +332,11 @@
 				files = files.filter((item) => item?.itemId !== tempItemId);
 			}
 		} catch (e) {
-			toast.error($i18n.t('Error uploading file: {{error}}', {
-				error: `${e}`
-			}));
+			toast.error(
+				$i18n.t('Error uploading file: {{error}}', {
+					error: `${e}`
+				})
+			);
 			files = files.filter((item) => item?.itemId !== tempItemId);
 		}
 	};
@@ -1459,7 +1481,10 @@
 													</Tooltip>
 												</div> -->
 											{:else}
-												<div class="flex items-center send-button-container" style="position: relative; z-index: 100; min-width: 40px; min-height: 40px; visibility: visible !important; display: flex !important;">
+												<div
+													class="flex items-center send-button-container"
+													style="position: relative; z-index: 100; min-width: 40px; min-height: 40px; visibility: visible !important; display: flex !important;"
+												>
 													<Tooltip content={$i18n.t('Send message')}>
 														<button
 															id="send-message-button"
@@ -1488,7 +1513,10 @@
 												</div>
 											{/if}
 										{:else}
-											<div class="flex items-center send-button-container" style="position: relative; z-index: 100; min-width: 40px; min-height: 40px; visibility: visible !important; display: flex !important;">
+											<div
+												class="flex items-center send-button-container"
+												style="position: relative; z-index: 100; min-width: 40px; min-height: 40px; visibility: visible !important; display: flex !important;"
+											>
 												<Tooltip content={$i18n.t('Stop')}>
 													<button
 														class="bg-white hover:bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5"

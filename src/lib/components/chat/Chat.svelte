@@ -458,7 +458,7 @@
 	});
 
 	// File upload functions
-	
+
 	// 添加文件处理状态的翻译映射
 	const processingStatusMap = {
 		uploaded: $i18n.t('Uploaded'),
@@ -469,7 +469,7 @@
 		completed: $i18n.t('Completed'),
 		error: $i18n.t('Error')
 	};
-	
+
 	// 获取文件状态的API函数
 	const getFileStatus = async (token, fileId) => {
 		try {
@@ -489,7 +489,7 @@
 			throw new Error(`Failed to get file status: ${e.message}`);
 		}
 	};
-	
+
 	// 轮询文件状态的函数
 	const pollFileStatus = async (fileId, fileItem) => {
 		const intervalId = setInterval(async () => {
@@ -497,27 +497,30 @@
 				const fileStatus = await getFileStatus(localStorage.token, fileId);
 				if (fileStatus) {
 					fileItem.processing_status = fileStatus.meta.processing_status;
-					
+
 					// 设置状态文本用于显示
-					fileItem.statusText = processingStatusMap[fileStatus.meta.processing_status] || $i18n.t('Processing');
-					
+					fileItem.statusText =
+						processingStatusMap[fileStatus.meta.processing_status] || $i18n.t('Processing');
+
 					// 更新collection_name（如果可用）
 					if (fileStatus.meta.collection_name && !fileItem.collection_name) {
 						fileItem.collection_name = fileStatus.meta.collection_name;
 					}
-					
+
 					// 当处理完成或出错时停止轮询
 					if (['completed', 'error'].includes(fileStatus.meta.processing_status)) {
 						clearInterval(intervalId);
-						
+
 						// 刷新文件列表以更新UI
 						files = files;
-						
+
 						// 如果处理失败，显示错误消息
 						if (fileStatus.meta.processing_status === 'error') {
-							toast.error($i18n.t('File processing error: {{error}}', {
-								error: fileStatus.meta.processing_error || 'Unknown error'
-							}));
+							toast.error(
+								$i18n.t('File processing error: {{error}}', {
+									error: fileStatus.meta.processing_error || 'Unknown error'
+								})
+							);
 						}
 					}
 				}
@@ -526,7 +529,7 @@
 				clearInterval(intervalId);
 			}
 		}, 3000); // 每3秒检查一次
-		
+
 		// 存储intervalId以便在组件卸载时清除
 		return intervalId;
 	};
@@ -631,13 +634,21 @@
 			fileItem.size = file.size;
 			fileItem.collection_name = uploadedFile?.meta?.collection_name;
 			fileItem.url = `${WEBUI_API_BASE_URL}/files/${uploadedFile.id}`;
-			
+
 			// 添加处理状态
 			fileItem.processing_status = uploadedFile?.meta?.processing_status || 'processing';
-			
+
 			// 如果文件仍在处理中，开始轮询状态
-			if (fileItem.processing_status && 
-				['uploaded', 'processing', 'extracting_content', 'updating_data', 'generating_embeddings'].includes(fileItem.processing_status)) {
+			if (
+				fileItem.processing_status &&
+				[
+					'uploaded',
+					'processing',
+					'extracting_content',
+					'updating_data',
+					'generating_embeddings'
+				].includes(fileItem.processing_status)
+			) {
 				pollFileStatus(fileItem.id, fileItem);
 			}
 
@@ -677,14 +688,23 @@
 					...res.file,
 					...fileItem.file
 				};
-				
+
 				// 添加处理状态
 				fileItem.processing_status = res.file?.meta?.processing_status || 'processing';
-				fileItem.statusText = processingStatusMap[fileItem.processing_status] || $i18n.t('Processing');
-				
+				fileItem.statusText =
+					processingStatusMap[fileItem.processing_status] || $i18n.t('Processing');
+
 				// 如果文件仍在处理中，开始轮询状态
-				if (fileItem.processing_status && 
-					['uploaded', 'processing', 'extracting_content', 'updating_data', 'generating_embeddings'].includes(fileItem.processing_status)) {
+				if (
+					fileItem.processing_status &&
+					[
+						'uploaded',
+						'processing',
+						'extracting_content',
+						'updating_data',
+						'generating_embeddings'
+					].includes(fileItem.processing_status)
+				) {
 					pollFileStatus(fileItem.file.id, fileItem);
 				}
 
@@ -721,17 +741,26 @@
 					...res.file,
 					...fileItem.file
 				};
-				
+
 				// 添加处理状态
 				fileItem.processing_status = res.file?.meta?.processing_status || 'processing';
-				fileItem.statusText = processingStatusMap[fileItem.processing_status] || $i18n.t('Processing');
-				
+				fileItem.statusText =
+					processingStatusMap[fileItem.processing_status] || $i18n.t('Processing');
+
 				// 如果文件仍在处理中，开始轮询状态
-				if (fileItem.processing_status && 
-					['uploaded', 'processing', 'extracting_content', 'updating_data', 'generating_embeddings'].includes(fileItem.processing_status)) {
+				if (
+					fileItem.processing_status &&
+					[
+						'uploaded',
+						'processing',
+						'extracting_content',
+						'updating_data',
+						'generating_embeddings'
+					].includes(fileItem.processing_status)
+				) {
 					pollFileStatus(fileItem.file.id, fileItem);
 				}
-				
+
 				files = files;
 			}
 		} catch (e) {

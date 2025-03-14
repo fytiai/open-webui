@@ -89,16 +89,14 @@
 			<div class=" flex justify-between text-gray-500 text-xs line-clamp-1">
 				{#if statusText}
 					<span class="text-blue-500 dark:text-blue-400">{statusText}</span>
+				{:else if type === 'file'}
+					{$i18n.t('File')}
+				{:else if type === 'doc'}
+					{$i18n.t('Document')}
+				{:else if type === 'collection'}
+					{$i18n.t('Collection')}
 				{:else}
-					{#if type === 'file'}
-						{$i18n.t('File')}
-					{:else if type === 'doc'}
-						{$i18n.t('Document')}
-					{:else if type === 'collection'}
-						{$i18n.t('Collection')}
-					{:else}
-						<span class=" capitalize line-clamp-1">{type}</span>
-					{/if}
+					<span class=" capitalize line-clamp-1">{type}</span>
 				{/if}
 				{#if size}
 					<span class="capitalize">{formatFileSize(size)}</span>
