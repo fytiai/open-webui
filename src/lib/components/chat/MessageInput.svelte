@@ -1093,8 +1093,8 @@
 														commandOptionButton?.click();
 													}
 												} else {
+													// 只去除移动设备检测条件，保留对触摸设备的检测
 													if (
-														!$mobile ||
 														!(
 															'ontouchstart' in window ||
 															navigator.maxTouchPoints > 0 ||
@@ -1457,7 +1457,7 @@
 													</Tooltip>
 												</div> -->
 											{:else}
-												<div class="flex items-center send-button-container" style="position: relative; z-index: 10; min-width: 40px; min-height: 40px;">
+												<div class="flex items-center send-button-container" style="position: relative; z-index: 100; min-width: 40px; min-height: 40px; visibility: visible !important; display: flex !important;">
 													<Tooltip content={$i18n.t('Send message')}>
 														<button
 															id="send-message-button"
@@ -1486,7 +1486,7 @@
 												</div>
 											{/if}
 										{:else}
-											<div class="flex items-center send-button-container" style="position: relative; z-index: 10; min-width: 40px; min-height: 40px;">
+											<div class="flex items-center send-button-container" style="position: relative; z-index: 100; min-width: 40px; min-height: 40px; visibility: visible !important; display: flex !important;">
 												<Tooltip content={$i18n.t('Stop')}>
 													<button
 														class="bg-white hover:bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5"
