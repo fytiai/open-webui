@@ -89,7 +89,7 @@ class OmniparseLoader:
         self.filename = filename
         self.file_path = file_path
         self.mime_type = mime_type
-        self.timeout = 500
+        self.timeout = 600
 
     def load(self) -> list[Document]:
         """加载并返回文档列表"""

@@ -3,7 +3,6 @@
 	import { v4 as uuidv4 } from 'uuid';
 	import { createPicker, getAuthToken } from '$lib/utils/google-drive-picker';
 	import { pickAndDownloadFile } from '$lib/utils/onedrive-file-picker';
-
 	import { onMount, tick, getContext, createEventDispatcher, onDestroy } from 'svelte';
 	const dispatch = createEventDispatcher();
 
@@ -85,6 +84,8 @@
 	let loaded = false;
 	let recording = false;
 
+	let isComposing = false;
+
 	let chatInputContainerElement;
 	let chatInputElement;
 
@@ -101,6 +102,112 @@
 	$: visionCapableModels = [...(atSelectedModel ? [atSelectedModel] : selectedModels)].filter(
 		(model) => $models.find((m) => m.id === model)?.info?.meta?.capabilities?.vision ?? true
 	);
+
+	// 添加文件处理状态的翻译映射
+	const processingStatusMap = {
+		uploaded: $i18n.t('Uploaded'),
+		processing: $i18n.t('Processing'),
+		extracting_content: $i18n.t('Extracting content'),
+		updating_data: $i18n.t('Updating data'),
+		generating_embeddings: $i18n.t('Generating embeddings'),
+		completed: $i18n.t('Completed'),
+		error: $i18n.t('Error')
+	};
+
+	// 获取处理状态显示文本
+	const getProcessingStatusText = (file) => {
+		if (file.status === 'uploading') return $i18n.t('Uploading');
+		return processingStatusMap[file.processing_status] || $i18n.t('Processing');
+	};
+
+	// 检查文件是否仍在处理中
+	const isFileProcessing = (file) => {
+		return (
+			file.status === 'uploading' ||
+			(file.processing_status &&
+				[
+					'uploaded',
+					'processing',
+					'extracting_content',
+					'updating_data',
+					'generating_embeddings'
+				].includes(file.processing_status))
+		);
+	};
+
+	// 获取文件状态的API函数
+	const getFileStatus = async (token, fileId) => {
+		try {
+			const response = await fetch(`${WEBUI_API_BASE_URL}/files/${fileId}/status`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			});
+			if (response.ok) {
+				return await response.json();
+			} else {
+				throw new Error(`Failed to get file status: ${response.status}`);
+			}
+		} catch (e) {
+			throw new Error(`Failed to get file status: ${e.message}`);
+		}
+	};
+
+	// 轮询文件状态的函数
+	const pollFileStatus = async (fileId, fileItem) => {
+		const intervalId = setInterval(async () => {
+			try {
+				const fileStatus = await getFileStatus(localStorage.token, fileId);
+				if (fileStatus) {
+					// 从返回的文件对象中提取处理状态
+					const meta = fileStatus.meta || {};
+					fileItem.processing_status = meta.processing_status || 'processing';
+
+					// 设置状态文本用于显示
+					fileItem.statusText = getProcessingStatusText(fileItem);
+					console.log(
+						'File status updated:',
+						fileItem.id,
+						fileItem.statusText,
+						fileItem.processing_status
+					);
+
+					// 更新collection_name（如果可用）
+					if (meta.collection_name && !fileItem.collection_name) {
+						fileItem.collection_name = meta.collection_name;
+					}
+
+					// 强制更新文件列表触发UI更新
+					files = [...files];
+
+					// 当处理完成或出错时停止轮询
+					if (['completed', 'error'].includes(fileItem.processing_status)) {
+						clearInterval(intervalId);
+
+						// 刷新文件列表以更新UI
+						files = files;
+
+						// 如果处理失败，显示错误消息
+						if (fileItem.processing_status === 'error') {
+							toast.error(
+								$i18n.t('File processing error: {{error}}', {
+									error: meta.processing_error || 'Unknown error'
+								})
+							);
+						}
+					}
+				}
+			} catch (e) {
+				console.error('Error polling file status:', e);
+				clearInterval(intervalId);
+			}
+		}, 3000); // 每3秒检查一次
+
+		// 存储intervalId以便在组件卸载时清除
+		return intervalId;
+	};
 
 	const scrollToBottom = () => {
 		const element = document.getElementById('messages-container');
@@ -165,6 +272,8 @@
 			size: file.size,
 			error: '',
 			itemId: tempItemId,
+			processing_status: 'uploading',
+			statusText: $i18n.t('Uploading'),
 			...(fullContext ? { context: 'full' } : {})
 		};
 
@@ -198,12 +307,36 @@
 					uploadedFile?.meta?.collection_name || uploadedFile?.collection_name;
 				fileItem.url = `${WEBUI_API_BASE_URL}/files/${uploadedFile.id}`;
 
+				// 添加处理状态
+				fileItem.processing_status = uploadedFile?.meta?.processing_status || 'processing';
+
+				// 设置状态文本用于显示
+				fileItem.statusText = getProcessingStatusText(fileItem);
+				console.log(
+					'Initial file status:',
+					fileItem.id,
+					fileItem.statusText,
+					fileItem.processing_status
+				);
+
+				// 强制更新文件列表触发UI更新
+				files = [...files];
+
+				// 如果文件仍在处理中，开始轮询状态
+				if (isFileProcessing(fileItem)) {
+					pollFileStatus(fileItem.id, fileItem);
+				}
+
 				files = files;
 			} else {
 				files = files.filter((item) => item?.itemId !== tempItemId);
 			}
 		} catch (e) {
-			toast.error(`${e}`);
+			toast.error(
+				$i18n.t('Error uploading file: {{error}}', {
+					error: `${e}`
+				})
+			);
 			files = files.filter((item) => item?.itemId !== tempItemId);
 		}
 	};
@@ -642,6 +775,7 @@
 													name={file.name}
 													type={file.type}
 													size={file?.size}
+													statusText={file.statusText || ''}
 													loading={file.status === 'uploading'}
 													dismissible={true}
 													edit={true}
@@ -676,12 +810,13 @@
 												bind:value={prompt}
 												id="chat-input"
 												messageInput={true}
-												shiftEnter={!$mobile ||
-													!(
-														'ontouchstart' in window ||
-														navigator.maxTouchPoints > 0 ||
-														navigator.msMaxTouchPoints > 0
-													)}
+												shiftEnter={!($settings?.ctrlEnterToSend ?? false) &&
+													(!$mobile ||
+														!(
+															'ontouchstart' in window ||
+															navigator.maxTouchPoints > 0 ||
+															navigator.msMaxTouchPoints > 0
+														))}
 												placeholder={placeholder ? placeholder : $i18n.t('Send a Message')}
 												largeTextAsFile={$settings?.largeTextAsFile ?? false}
 												autocomplete={$config?.features.enable_autocomplete_generation}
@@ -706,6 +841,8 @@
 													console.log(res);
 													return res;
 												}}
+												oncompositionstart={() => (isComposing = true)}
+												oncompositionend={() => (isComposing = false)}
 												on:keydown={async (e) => {
 													e = e.detail.event;
 
@@ -805,19 +942,24 @@
 																navigator.msMaxTouchPoints > 0
 															)
 														) {
-															// Prevent Enter key from creating a new line
-															// Uses keyCode '13' for Enter key for chinese/japanese keyboards
-															if (e.keyCode === 13 && !e.shiftKey) {
-																e.preventDefault();
+															if (isComposing) {
+																return;
 															}
 
-															// Submit the prompt when Enter key is pressed
-															if (
-																(prompt !== '' || files.length > 0) &&
-																e.keyCode === 13 &&
-																!e.shiftKey
-															) {
-																dispatch('submit', prompt);
+															// Uses keyCode '13' for Enter key for chinese/japanese keyboards.
+															//
+															// Depending on the user's settings, it will send the message
+															// either when Enter is pressed or when Ctrl+Enter is pressed.
+															const enterPressed =
+																($settings?.ctrlEnterToSend ?? false)
+																	? (e.key === 'Enter' || e.keyCode === 13) && isCtrlPressed
+																	: (e.key === 'Enter' || e.keyCode === 13) && !e.shiftKey;
+
+															if (enterPressed) {
+																e.preventDefault();
+																if (prompt !== '' || files.length > 0) {
+																	dispatch('submit', prompt);
+																}
 															}
 														}
 													}
@@ -880,38 +1022,19 @@
 											class="scrollbar-hidden bg-transparent dark:text-gray-100 outline-hidden w-full pt-3 px-1 resize-none"
 											placeholder={placeholder ? placeholder : $i18n.t('Send a Message')}
 											bind:value={prompt}
-											on:keypress={(e) => {
-												if (
-													!$mobile ||
-													!(
-														'ontouchstart' in window ||
-														navigator.maxTouchPoints > 0 ||
-														navigator.msMaxTouchPoints > 0
-													)
-												) {
-													// Prevent Enter key from creating a new line
-													if (e.key === 'Enter' && !e.shiftKey) {
-														e.preventDefault();
-													}
-
-													// Submit the prompt when Enter key is pressed
-													if (
-														(prompt !== '' || files.length > 0) &&
-														e.key === 'Enter' &&
-														!e.shiftKey
-													) {
-														dispatch('submit', prompt);
-													}
-												}
-											}}
+											on:compositionstart={() => (isComposing = true)}
+											on:compositionend={() => (isComposing = false)}
 											on:keydown={async (e) => {
 												const isCtrlPressed = e.ctrlKey || e.metaKey; // metaKey is for Cmd key on Mac
+
+												console.log('keydown', e);
 												const commandsContainerElement =
 													document.getElementById('commands-container');
 
 												if (e.key === 'Escape') {
 													stopResponse();
 												}
+
 												// Command/Ctrl + Shift + Enter to submit a message pair
 												if (isCtrlPressed && e.key === 'Enter' && e.shiftKey) {
 													e.preventDefault();
@@ -947,51 +1070,87 @@
 													editButton?.click();
 												}
 
-												if (commandsContainerElement && e.key === 'ArrowUp') {
-													e.preventDefault();
-													commandsElement.selectUp();
+												if (commandsContainerElement) {
+													if (commandsContainerElement && e.key === 'ArrowUp') {
+														e.preventDefault();
+														commandsElement.selectUp();
 
-													const commandOptionButton = [
-														...document.getElementsByClassName('selected-command-option-button')
-													]?.at(-1);
-													commandOptionButton.scrollIntoView({ block: 'center' });
-												}
+														const commandOptionButton = [
+															...document.getElementsByClassName('selected-command-option-button')
+														]?.at(-1);
+														commandOptionButton.scrollIntoView({ block: 'center' });
+													}
 
-												if (commandsContainerElement && e.key === 'ArrowDown') {
-													e.preventDefault();
-													commandsElement.selectDown();
+													if (commandsContainerElement && e.key === 'ArrowDown') {
+														e.preventDefault();
+														commandsElement.selectDown();
 
-													const commandOptionButton = [
-														...document.getElementsByClassName('selected-command-option-button')
-													]?.at(-1);
-													commandOptionButton.scrollIntoView({ block: 'center' });
-												}
+														const commandOptionButton = [
+															...document.getElementsByClassName('selected-command-option-button')
+														]?.at(-1);
+														commandOptionButton.scrollIntoView({ block: 'center' });
+													}
 
-												if (commandsContainerElement && e.key === 'Enter') {
-													e.preventDefault();
+													if (commandsContainerElement && e.key === 'Enter') {
+														e.preventDefault();
 
-													const commandOptionButton = [
-														...document.getElementsByClassName('selected-command-option-button')
-													]?.at(-1);
+														const commandOptionButton = [
+															...document.getElementsByClassName('selected-command-option-button')
+														]?.at(-1);
 
-													if (e.shiftKey) {
-														prompt = `${prompt}\n`;
-													} else if (commandOptionButton) {
+														if (e.shiftKey) {
+															prompt = `${prompt}\n`;
+														} else if (commandOptionButton) {
+															commandOptionButton?.click();
+														} else {
+															document.getElementById('send-message-button')?.click();
+														}
+													}
+
+													if (commandsContainerElement && e.key === 'Tab') {
+														e.preventDefault();
+
+														const commandOptionButton = [
+															...document.getElementsByClassName('selected-command-option-button')
+														]?.at(-1);
+
 														commandOptionButton?.click();
-													} else {
-														document.getElementById('send-message-button')?.click();
+													}
+												} else {
+													// 只去除移动设备检测条件，保留对触摸设备的检测
+													if (
+														!(
+															'ontouchstart' in window ||
+															navigator.maxTouchPoints > 0 ||
+															navigator.msMaxTouchPoints > 0
+														)
+													) {
+														if (isComposing) {
+															return;
+														}
+
+														console.log('keypress', e);
+														// Prevent Enter key from creating a new line
+														const isCtrlPressed = e.ctrlKey || e.metaKey;
+														const enterPressed =
+															($settings?.ctrlEnterToSend ?? false)
+																? (e.key === 'Enter' || e.keyCode === 13) && isCtrlPressed
+																: (e.key === 'Enter' || e.keyCode === 13) && !e.shiftKey;
+
+														console.log('Enter pressed:', enterPressed);
+
+														if (enterPressed) {
+															e.preventDefault();
+														}
+
+														// Submit the prompt when Enter key is pressed
+														if ((prompt !== '' || files.length > 0) && enterPressed) {
+															dispatch('submit', prompt);
+														}
 													}
 												}
 
-												if (commandsContainerElement && e.key === 'Tab') {
-													e.preventDefault();
-
-													const commandOptionButton = [
-														...document.getElementsByClassName('selected-command-option-button')
-													]?.at(-1);
-
-													commandOptionButton?.click();
-												} else if (e.key === 'Tab') {
+												if (e.key === 'Tab') {
 													const words = findWordIndices(prompt);
 
 													if (words.length > 0) {
@@ -1322,7 +1481,10 @@
 													</Tooltip>
 												</div> -->
 											{:else}
-												<div class=" flex items-center">
+												<div
+													class="flex items-center send-button-container"
+													style="position: relative; z-index: 100; min-width: 40px; min-height: 40px; visibility: visible !important; display: flex !important;"
+												>
 													<Tooltip content={$i18n.t('Send message')}>
 														<button
 															id="send-message-button"
@@ -1351,7 +1513,10 @@
 												</div>
 											{/if}
 										{:else}
-											<div class=" flex items-center">
+											<div
+												class="flex items-center send-button-container"
+												style="position: relative; z-index: 100; min-width: 40px; min-height: 40px; visibility: visible !important; display: flex !important;"
+											>
 												<Tooltip content={$i18n.t('Stop')}>
 													<button
 														class="bg-white hover:bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-800 transition rounded-full p-1.5"

@@ -5,17 +5,19 @@ from datetime import datetime
 from typing import Optional, Tuple, List
 import uuid
 
+
 from open_webui.utils.misc import get_last_user_message, get_messages_content
 
 from open_webui.env import SRC_LOG_LEVELS
 from open_webui.config import DEFAULT_RAG_TEMPLATE
+
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
 
 
 def get_task_model_id(
-        default_model_id: str, task_model: str, task_model_external: str, models
+    default_model_id: str, task_model: str, task_model_external: str, models
 ) -> str:
     # Set the task model
     task_model_id = default_model_id
@@ -37,7 +39,7 @@ def prompt_variables_template(template: str, variables: dict[str, str]) -> str:
 
 
 def prompt_template(
-        template: str, user_name: Optional[str] = None, user_location: Optional[str] = None
+    template: str, user_name: Optional[str] = None, user_location: Optional[str] = None
 ) -> str:
     # Get the current date
     current_date = datetime.now()
@@ -85,13 +87,13 @@ def replace_prompt_variable(template: str, prompt: str) -> str:
         elif start_length is not None:
             return prompt[: int(start_length)]
         elif end_length is not None:
-            return prompt[-int(end_length):]
+            return prompt[-int(end_length) :]
         elif middle_length is not None:
             middle_length = int(middle_length)
             if len(prompt) <= middle_length:
                 return prompt
             start = prompt[: math.ceil(middle_length / 2)]
-            end = prompt[-math.floor(middle_length / 2):]
+            end = prompt[-math.floor(middle_length / 2) :]
             return f"{start}...{end}"
         return ""
 
@@ -102,7 +104,7 @@ def replace_prompt_variable(template: str, prompt: str) -> str:
 
 
 def replace_messages_variable(
-        template: str, messages: Optional[list[str]] = None
+    template: str, messages: Optional[list[dict]] = None
 ) -> str:
     def replacement_function(match):
         full_match = match.group(0)
@@ -119,7 +121,7 @@ def replace_messages_variable(
         elif start_length is not None:
             return get_messages_content(messages[: int(start_length)])
         elif end_length is not None:
-            return get_messages_content(messages[-int(end_length):])
+            return get_messages_content(messages[-int(end_length) :])
         elif middle_length is not None:
             mid = int(middle_length)
 
@@ -128,7 +130,7 @@ def replace_messages_variable(
             # Handle middle truncation: split to get start and end portions of the messages list
             half = mid // 2
             start_msgs = messages[:half]
-            end_msgs = messages[-half:] if mid % 2 == 0 else messages[-(half + 1):]
+            end_msgs = messages[-half:] if mid % 2 == 0 else messages[-(half + 1) :]
             formatted_start = get_messages_content(start_msgs)
             formatted_end = get_messages_content(end_msgs)
             return f"{formatted_start}\n{formatted_end}"
@@ -185,7 +187,7 @@ def rag_template(template: str, context: str, query: str):
 
 
 def title_generation_template(
-        template: str, messages: list[dict], user: Optional[dict] = None
+    template: str, messages: list[dict], user: Optional[dict] = None
 ) -> str:
     prompt = get_last_user_message(messages)
     template = replace_prompt_variable(template, prompt)
@@ -204,7 +206,7 @@ def title_generation_template(
 
 
 def tags_generation_template(
-        template: str, messages: list[dict], user: Optional[dict] = None
+    template: str, messages: list[dict], user: Optional[dict] = None
 ) -> str:
     prompt = get_last_user_message(messages)
     template = replace_prompt_variable(template, prompt)
@@ -222,7 +224,7 @@ def tags_generation_template(
 
 
 def image_prompt_generation_template(
-        template: str, messages: list[dict], user: Optional[dict] = None
+    template: str, messages: list[dict], user: Optional[dict] = None
 ) -> str:
     prompt = get_last_user_message(messages)
     template = replace_prompt_variable(template, prompt)
@@ -240,7 +242,7 @@ def image_prompt_generation_template(
 
 
 def emoji_generation_template(
-        template: str, prompt: str, user: Optional[dict] = None
+    template: str, prompt: str, user: Optional[dict] = None
 ) -> str:
     template = replace_prompt_variable(template, prompt)
     template = prompt_template(
@@ -256,11 +258,11 @@ def emoji_generation_template(
 
 
 def autocomplete_generation_template(
-        template: str,
-        prompt: str,
-        messages: Optional[list[dict]] = None,
-        type: Optional[str] = None,
-        user: Optional[dict] = None,
+    template: str,
+    prompt: str,
+    messages: Optional[list[dict]] = None,
+    type: Optional[str] = None,
+    user: Optional[dict] = None,
 ) -> str:
     template = template.replace("{{TYPE}}", type if type else "")
     template = replace_prompt_variable(template, prompt)
@@ -278,7 +280,7 @@ def autocomplete_generation_template(
 
 
 def query_generation_template(
-        template: str, messages: list[dict], user: Optional[dict] = None
+    template: str, messages: list[dict], user: Optional[dict] = None
 ) -> str:
     prompt = get_last_user_message(messages)
     template = replace_prompt_variable(template, prompt)
@@ -296,7 +298,7 @@ def query_generation_template(
 
 
 def moa_response_generation_template(
-        template: str, prompt: str, responses: list[str]
+    template: str, prompt: str, responses: list[str]
 ) -> str:
     def replacement_function(match):
         full_match = match.group(0)
@@ -309,13 +311,13 @@ def moa_response_generation_template(
         elif start_length is not None:
             return prompt[: int(start_length)]
         elif end_length is not None:
-            return prompt[-int(end_length):]
+            return prompt[-int(end_length) :]
         elif middle_length is not None:
             middle_length = int(middle_length)
             if len(prompt) <= middle_length:
                 return prompt
             start = prompt[: math.ceil(middle_length / 2)]
-            end = prompt[-math.floor(middle_length / 2):]
+            end = prompt[-math.floor(middle_length / 2) :]
             return f"{start}...{end}"
         return ""
 

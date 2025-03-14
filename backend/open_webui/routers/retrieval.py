@@ -59,7 +59,7 @@ from open_webui.retrieval.web.serpstack import search_serpstack
 from open_webui.retrieval.web.tavily import search_tavily
 from open_webui.retrieval.web.bing import search_bing
 from open_webui.retrieval.web.exa import search_exa
-
+from open_webui.retrieval.web.perplexity import search_perplexity
 
 from open_webui.retrieval.utils import (
     get_embedding_function,
@@ -405,6 +405,7 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
                 "bing_search_v7_endpoint": request.app.state.config.BING_SEARCH_V7_ENDPOINT,
                 "bing_search_v7_subscription_key": request.app.state.config.BING_SEARCH_V7_SUBSCRIPTION_KEY,
                 "exa_api_key": request.app.state.config.EXA_API_KEY,
+                "perplexity_api_key": request.app.state.config.PERPLEXITY_API_KEY,
                 "result_count": request.app.state.config.RAG_WEB_SEARCH_RESULT_COUNT,
                 "trust_env": request.app.state.config.RAG_WEB_SEARCH_TRUST_ENV,
                 "concurrent_requests": request.app.state.config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS,
@@ -465,6 +466,7 @@ class WebSearchConfig(BaseModel):
     bing_search_v7_endpoint: Optional[str] = None
     bing_search_v7_subscription_key: Optional[str] = None
     exa_api_key: Optional[str] = None
+    perplexity_api_key: Optional[str] = None
     result_count: Optional[int] = None
     concurrent_requests: Optional[int] = None
     trust_env: Optional[bool] = None
@@ -617,6 +619,10 @@ async def update_rag_config(
 
         request.app.state.config.EXA_API_KEY = form_data.web.search.exa_api_key
 
+        request.app.state.config.PERPLEXITY_API_KEY = (
+            form_data.web.search.perplexity_api_key
+        )
+
         request.app.state.config.RAG_WEB_SEARCH_RESULT_COUNT = (
             form_data.web.search.result_count
         )
@@ -683,6 +689,7 @@ async def update_rag_config(
                 "bing_search_v7_endpoint": request.app.state.config.BING_SEARCH_V7_ENDPOINT,
                 "bing_search_v7_subscription_key": request.app.state.config.BING_SEARCH_V7_SUBSCRIPTION_KEY,
                 "exa_api_key": request.app.state.config.EXA_API_KEY,
+                "perplexity_api_key": request.app.state.config.PERPLEXITY_API_KEY,
                 "result_count": request.app.state.config.RAG_WEB_SEARCH_RESULT_COUNT,
                 "concurrent_requests": request.app.state.config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS,
                 "trust_env": request.app.state.config.RAG_WEB_SEARCH_TRUST_ENV,
@@ -980,6 +987,13 @@ def process_file(
             file_path = file.path
             if file_path:
                 file_path = Storage.get_file(file_path)
+                
+                # 更新处理状态
+                Files.update_file_metadata_by_id(
+                    file.id, {"processing_status": "extracting_content"}
+                )
+                
+                # 使用加载器处理文件
                 loader = Loader(
                     engine=request.app.state.config.CONTENT_EXTRACTION_ENGINE,
                     TIKA_SERVER_URL=request.app.state.config.TIKA_SERVER_URL,
@@ -987,12 +1001,18 @@ def process_file(
                     DOCUMENT_INTELLIGENCE_ENDPOINT=request.app.state.config.DOCUMENT_INTELLIGENCE_ENDPOINT,
                     DOCUMENT_INTELLIGENCE_KEY=request.app.state.config.DOCUMENT_INTELLIGENCE_KEY,
                 )
-                docs = loader.load(
+                
+                # 使用生成器模式加载文档，避免一次性加载所有内容
+                docs_generator = loader.load(
                     file.filename, file.meta.get("content_type"), file_path
                 )
-
-                docs = [
-                    Document(
+                
+                # 转换生成器为文档列表，同时添加元数据
+                docs = []
+                text_content_parts = []
+                
+                for doc in docs_generator:
+                    doc_with_metadata = Document(
                         page_content=doc.page_content,
                         metadata={
                             **doc.metadata,
@@ -1002,8 +1022,11 @@ def process_file(
                             "source": file.filename,
                         },
                     )
-                    for doc in docs
-                ]
+                    docs.append(doc_with_metadata)
+                    text_content_parts.append(doc.page_content)
+                
+                # 高效地连接文本内容
+                text_content = " ".join(text_content_parts)
             else:
                 docs = [
                     Document(
@@ -1017,9 +1040,12 @@ def process_file(
                         },
                     )
                 ]
-            text_content = " ".join([doc.page_content for doc in docs])
+            text_content = file.data.get("content", "")
 
-        log.debug(f"text_content: {text_content}")
+        # 更新处理状态
+        Files.update_file_metadata_by_id(
+            file.id, {"processing_status": "updating_data"}
+        )
         Files.update_file_data_by_id(
             file.id,
             {"content": text_content},
@@ -1030,6 +1056,12 @@ def process_file(
 
         if not request.app.state.config.BYPASS_EMBEDDING_AND_RETRIEVAL:
             try:
+                # 更新处理状态
+                Files.update_file_metadata_by_id(
+                    file.id, {"processing_status": "generating_embeddings"}
+                )
+                
+                # 保存文档到向量数据库
                 result = save_docs_to_vector_db(
                     request,
                     docs=docs,
@@ -1044,10 +1076,12 @@ def process_file(
                 )
 
                 if result:
+                    # 更新文件元数据
                     Files.update_file_metadata_by_id(
                         file.id,
                         {
                             "collection_name": collection_name,
+                            "processing_status": "completed",
                         },
                     )
 
@@ -1058,8 +1092,21 @@ def process_file(
                         "content": text_content,
                     }
             except Exception as e:
+                # 更新处理状态为错误
+                Files.update_file_metadata_by_id(
+                    file.id, 
+                    {
+                        "processing_status": "error",
+                        "processing_error": str(e)
+                    }
+                )
                 raise e
         else:
+            # 更新处理状态为完成
+            Files.update_file_metadata_by_id(
+                file.id, {"processing_status": "completed"}
+            )
+            
             return {
                 "status": True,
                 "collection_name": None,
@@ -1182,9 +1229,13 @@ def process_web(
         content = " ".join([doc.page_content for doc in docs])
 
         log.debug(f"text_content: {content}")
-        save_docs_to_vector_db(
-            request, docs, collection_name, overwrite=True, user=user
-        )
+
+        if not request.app.state.config.BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL:
+            save_docs_to_vector_db(
+                request, docs, collection_name, overwrite=True, user=user
+            )
+        else:
+            collection_name = None
 
         return {
             "status": True,
@@ -1196,6 +1247,7 @@ def process_web(
                 },
                 "meta": {
                     "name": form_data.url,
+                    "source": form_data.url,
                 },
             },
         }
@@ -1221,6 +1273,7 @@ def search_web(request: Request, engine: str, query: str) -> list[SearchResult]:
     - SERPLY_API_KEY
     - TAVILY_API_KEY
     - EXA_API_KEY
+    - PERPLEXITY_API_KEY
     - SEARCHAPI_API_KEY + SEARCHAPI_ENGINE (by default `google`)
     - SERPAPI_API_KEY + SERPAPI_ENGINE (by default `google`)
     Args:
@@ -1381,6 +1434,13 @@ def search_web(request: Request, engine: str, query: str) -> list[SearchResult]:
     elif engine == "exa":
         return search_exa(
             request.app.state.config.EXA_API_KEY,
+            query,
+            request.app.state.config.RAG_WEB_SEARCH_RESULT_COUNT,
+            request.app.state.config.RAG_WEB_SEARCH_DOMAIN_FILTER_LIST,
+        )
+    elif engine == "perplexity":
+        return search_perplexity(
+            request.app.state.config.PERPLEXITY_API_KEY,
             query,
             request.app.state.config.RAG_WEB_SEARCH_RESULT_COUNT,
             request.app.state.config.RAG_WEB_SEARCH_DOMAIN_FILTER_LIST,

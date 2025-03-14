@@ -17,13 +17,14 @@
 	export let dismissible = false;
 	export let loading = false;
 
-	export let item = null;
+	export let item: any = null;
 	export let edit = false;
 	export let small = false;
 
 	export let name: string;
 	export let type: string;
 	export let size: number;
+	export let statusText: string = '';
 
 	import { deleteFileById } from '$lib/apis/files';
 
@@ -45,9 +46,9 @@
 		} else {
 			if (url) {
 				if (type === 'file') {
-					window.open(`${url}/content`, '_blank').focus();
+					window.open(`${url}/content`, '_blank')?.focus();
 				} else {
-					window.open(`${url}`, '_blank').focus();
+					window.open(`${url}`, '_blank')?.focus();
 				}
 			}
 		}
@@ -86,7 +87,9 @@
 			</div>
 
 			<div class=" flex justify-between text-gray-500 text-xs line-clamp-1">
-				{#if type === 'file'}
+				{#if statusText}
+					<span class="text-blue-500 dark:text-blue-400">{statusText}</span>
+				{:else if type === 'file'}
 					{$i18n.t('File')}
 				{:else if type === 'doc'}
 					{$i18n.t('Document')}
